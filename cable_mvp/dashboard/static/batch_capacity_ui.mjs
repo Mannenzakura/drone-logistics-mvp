@@ -1,9 +1,9 @@
-import {activeStations,batchPressure} from './batch_capacity.mjs?v=20260930-batch1';
+import {activeStations,batchPressure,stationTrips} from './batch_capacity.mjs?v=20260930-random2';
 const $=id=>document.getElementById(id),fmt=x=>x===null||x===undefined?'—':Number(x).toFixed(2);
 const keys=['batchSize','batchLocal','batchReserved'];
 function defaults(p,s,i){const size=p['batchSize'+s]?.[i]??Math.max(p.formationSize,p['seats'+s]+1);return [size,p['batchLocal'+s]?.[i]??Math.max(1,size-p['seats'+s]),p['batchReserved'+s]?.[i]??0]}
 export function fillBatchEditor(p){
-  const container=$('batchEditors');container.replaceChildren();
+  const container=$('batchEditors');container.replaceChildren();if(p.capacityMode!==1){const note=document.createElement('p');note.textContent=p.capacityMode===2?'随机模式：程序按种子、编队上限和各站本地需求概率生成名单，应用后在下方班次结果查看。':'固定模式；切换手工模式后可编辑逐班名单。';container.append(note);return}
   for(const station of ['C','D','E']){
     const wrap=document.createElement('div');wrap.hidden=station==='E'&&p.stationCount!==5;
     const title=document.createElement('h3');title.textContent=`${station} 点班次成员表`;wrap.append(title);
@@ -31,6 +31,7 @@ export function previewBatchEditor(){
   }
 }
 export function readBatchEditor(p){
+  if(p.capacityMode!==1)return p;
   for(const station of ['C','D','E']){
     const previous=new Map([...$('batchEditors').querySelectorAll(`tr[data-station="${station}"]`)].map(row=>[Number(row.dataset.time),[...row.querySelectorAll('input')].map(input=>input.value.trim()===''?NaN:Number(input.value))]));
     keys.forEach((key,column)=>p[key+station]=p['departures'+station].map((time,index)=>(previous.get(time)??defaults(p,station,index))[column]));
@@ -58,7 +59,7 @@ export function renderBatchResults(plan){
   }
   const stats=batchPressure(plan.p,plan.schedule);
   $('batchPressure').textContent=stats.map(s=>`${s.station}：继续中转到达 ${s.arrived} 架 / 有效供给 ${s.offered} 位；已发 ${s.boarded} 架，未发 ${s.unserved} 架；已发者平均滞留 ${fmt(s.meanWait)} min，最长 ${fmt(s.maxWait)} min；超过 ${plan.p.waitWarning} min 的 ${s.exceeded} 架；零空位班次 ${s.zeroTrips} 班。`).join('\n');
-  $('batchModelNotice').textContent=plan.p.capacityMode===1?'已应用逐班成员表。实际出发规模＝本地飞机＋本班成功登机的中转飞机；预留空位不视为实际飞机，不贡献节能。费用仍只计算目标机。':'已应用固定位次模式：班次中转容量固定，本地成员没有逐班建模；能耗仍使用设置的编队规模。';
+  $('batchModelNotice').textContent=plan.p.capacityMode!==0?`${plan.p.capacityMode===2?'已应用随机本地需求，种子 '+plan.p.batchSeed+'。':'已应用逐班成员表。'}实际出发规模＝本地飞机＋本班成功登机的中转飞机；预留空位不视为实际飞机，不贡献节能。费用仍只计算目标机。`:'已应用固定位次模式：班次中转容量固定，本地成员没有逐班建模；能耗仍使用设置的编队规模。';
 }
 export function updateBatchLive(plan,time){
   const recent=plan.schedule.batches.filter(b=>b.time<=time).sort((a,b)=>b.time-a.time).slice(0,3);

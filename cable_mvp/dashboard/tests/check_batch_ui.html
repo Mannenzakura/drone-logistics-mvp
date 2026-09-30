@@ -8,7 +8,8 @@ const timer=setInterval(()=>{
  started=true;clearInterval(timer);
  try{
   const assert=(condition,text)=>{if(!condition)throw new Error(text)};
-  assert(d.querySelector('#p_capacityMode').value==='1','默认未启用逐班模式');
+  assert(d.querySelector('#p_capacityMode').value==='2','默认未启用随机模式');
+  d.querySelector('#variableBatches').click();d.querySelector('#form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
   let rows=[...d.querySelectorAll('#batchResults tr')].filter(r=>r.dataset.station==='C');
   assert(rows[0].children[6].textContent==='3'&&rows[1].children[6].textContent==='0'&&rows[2].children[6].textContent==='4','3/0/4 位次没有进入排程');
   d.querySelector('#p_battery').value='8';d.querySelector('#mode5').click();d.querySelector('#form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));

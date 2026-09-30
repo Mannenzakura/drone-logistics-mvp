@@ -1,6 +1,17 @@
 // Local roster includes the leader. Reserved slots are held empty and provide no wake benefit.
 export function activeStations(p){return p.stationCount===5?['C','D','E']:['C','D']}
+export function randomTrips(p,station){
+  let seed=(p.batchSeed ^ ({C:1103,D:2207,E:3301}[station]))>>>0;
+  const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+  return p['departures'+station].map(time=>{
+    const plannedSize=p.batchMax,reserved=p.batchReserve;
+    let local=1;
+    for(let i=1;i<plannedSize-reserved;i++)if(random()<p['localProbability'+station])local++;
+    return {time,cancelled:false,plannedSize,local,reserved,seats:plannedSize-local-reserved};
+  });
+}
 export function stationTrips(p,station){
+  if(p.capacityMode===2)return randomTrips(p,station);
   return p['departures'+station].map((time,index)=>{
     if(p.capacityMode!==1)return {time,cancelled:false,seats:p['seats'+station],plannedSize:p.formationSize,local:null,reserved:0};
     const plannedSize=p['batchSize'+station][index],local=p['batchLocal'+station][index],reserved=p['batchReserved'+station][index];
@@ -8,7 +19,12 @@ export function stationTrips(p,station){
   });
 }
 export function validateBatchCapacity(p){
-  if(![0,1].includes(p.capacityMode))throw new Error('位次模式须为 0（固定）或 1（逐班）');
+  if(![0,1,2].includes(p.capacityMode))throw new Error('位次模式须为 0 固定、1 手工、2 随机');
+  if(p.capacityMode===2){
+    if(!Number.isInteger(p.batchSeed)||p.batchSeed<0||p.batchSeed>4294967295)throw new Error('随机种子须为 0–4294967295 整数');
+    if(!Number.isInteger(p.batchMax)||p.batchMax<1||p.batchMax>20||!Number.isInteger(p.batchReserve)||p.batchReserve<0||p.batchReserve>=p.batchMax)throw new Error('随机总规模须为 1–20，预留空位须小于总规模');
+    for(const s of activeStations(p))if(!Number.isFinite(p['localProbability'+s])||p['localProbability'+s]<0||p['localProbability'+s]>1)throw new Error(`${s} 本地需求概率须在 0–1 之间`);
+  }
   for(const station of activeStations(p)){
     if(!Number.isInteger(p['seats'+station])||p['seats'+station]<0||p['seats'+station]>20)throw new Error(`${station} 固定空位须为 0–20 的整数`);
     if(p.capacityMode!==1)continue;

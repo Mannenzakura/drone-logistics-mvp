@@ -1,8 +1,8 @@
-import {boardFifo} from './network/engine.mjs?v=20260930-batch1';
-import {stationTrips,validateBatchCapacity} from './batch_capacity.mjs?v=20260930-batch1';
+import {boardFifo} from './network/engine.mjs?v=20260930-random2';
+import {stationTrips,validateBatchCapacity} from './batch_capacity.mjs?v=20260930-random2';
 
 export const FOUR_DEFAULTS={
-  capacityMode:0,waitWarning:15,
+  capacityMode:0,waitWarning:15,batchSeed:20260930,batchMax:10,batchReserve:0,localProbabilityC:0.8,localProbabilityD:0.8,localProbabilityE:0.8,
   batchSizeC:[],batchLocalC:[],batchReservedC:[],batchSizeD:[],batchLocalD:[],batchReservedD:[],batchSizeE:[],batchLocalE:[],batchReservedE:[],
   stationCount:4,destinations:[],de:12.5,eb:12.5,departuresE:[44,48,52,56,60,64,68,72,76],seatsE:2,serviceE:0,
   arrivalsC:[17,18,19,22,23,24],backgroundServiceC:[0,0,0,0,0,0],backgroundServiceD:[0,0,0,0,0,0],target:2,
@@ -75,7 +75,7 @@ function grid(max,step){const values=[];for(let x=0;x<max-EPS;x+=step)values.pus
 function gamma(p,size=p.formationSize){const a=(size-1)/size;return 1-p.chi*p.eta*(p.role===1?a:p.role===2?a*a:0)}
 
 export function cruiseFour(p,target,dC,lC,lD){
-  const size=station=>p.capacityMode===1?target['formation'+station]:p.formationSize;
+  const size=station=>p.capacityMode!==0?target['formation'+station]:p.formationSize;
   const gC=gamma(p,size('C')),gD=gamma(p,size('D')),gE=p.stationCount===5?gamma(p,size('E')):gD;
   const eAC=p.ac*(p.k0+p.kLoad*(p.q+dC)),soloCD=p.cd*(p.k0+p.kLoad*(p.q+lC));
   const perKm=p.k0+p.kLoad*(p.q+lD),eCD=soloCD*gC;
