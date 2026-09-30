@@ -1,5 +1,5 @@
 <!doctype html><meta charset="utf-8"><title>逐班位次交互核验</title>
-<body data-result="pending"><p id="result">检查中</p><iframe id="app" src="../static/" style="width:1400px;height:1000px"></iframe>
+<body data-result="pending"><p id="result">检查中</p><iframe id="app" src="../static/?view=chain" style="width:1400px;height:1000px"></iframe>
 <script>
 let started=false;
 const timer=setInterval(()=>{
@@ -28,3 +28,4 @@ const timer=setInterval(()=>{
 },100);
 setTimeout(()=>{if(!started){clearInterval(timer);document.body.dataset.result='timeout';document.querySelector('#result').textContent='页面初始化超时'}},15000);
 </script>
+
