@@ -1,0 +1,37 @@
+import assert from 'node:assert/strict';
+import {FOUR_DEFAULTS,scheduleFour,optimizeFour,evaluateFour,validateFour} from '../static/four_model.mjs';
+import {fourStudies,fourRisks} from '../static/four_studies.mjs';
+const p={...FOUR_DEFAULTS,arrivalsC:[0,0,0],backgroundServiceC:[0,0,0],backgroundServiceD:[0,0,0],target:2,
+  cd:1.8,db:1.8,de:1.8,eb:1.8,speed:108,seatsC:3,seatsD:1,seatsE:1,
+  departuresC:[1,2,3],departuresD:[3,4,5,6],departuresE:[5,6,7,8],destinations:['D','B','B']};
+const four=scheduleFour(p,0,0);
+assert.equal(four.rows[0].completionTime,2);
+assert.equal(four.rows[0].departD,null,'D terminal flight must not take D→B capacity');
+assert.equal(four.rows[1].departD,3);
+assert.equal(four.rows[2].departD,4);
+const fiveP={...p,stationCount:5,destinations:['D','E','B']};
+const five=scheduleFour(fiveP,0,0);
+assert.equal(five.rows[0].arrivalE,null);
+assert.equal(five.rows[1].arrivalE,4);
+assert.equal(five.rows[1].departE,null,'E terminal flight must not take E→B capacity');
+assert.equal(five.rows[2].departE,6);
+assert.equal(five.rows[2].arrivalB,7);
+assert.deepEqual(five.events.filter(e=>e.station==='E'&&e.type==='board').map(e=>e.flight),[2]);
+const allB=scheduleFour({...fiveP,destinations:['B','B','B']},0,0);
+assert.ok(allB.rows[2].arrivalB>five.rows[2].arrivalB,'Terminating traffic must reduce downstream capacity demand');
+assert.equal(scheduleFour({...p,destinations:['B','B','B']},0,0).rows[0].departC,four.rows[0].departC,'Final destination must not create extra C seats');
+assert.throws(()=>validateFour({...fiveP,destinations:['D','E','D']}),/目标机/);
+assert.throws(()=>validateFour({...p,destinations:['D','E','B']}),/目的地/);
+const demo={...FOUR_DEFAULTS,stationCount:5,destinations:['D','E','B','D','B','E']};
+const best=optimizeFour(demo);
+assert.ok(best.target.arrivalE!==null&&best.target.arrivalB!==null);
+assert.ok(Math.abs(best.energy-(best.eAC+best.eCD+best.eDB+best.eWait+best.eHandle))<1e-9);
+assert.ok(best.eWait>=demo.loiterRate*(best.target.waitC+best.target.waitD+best.target.waitE)-1e-9);
+const risks=fourRisks(best,{arrivalJitter:0,serviceJitterC:0,serviceJitterD:0,transitJitter:0,cancelChance:0,trials:1});
+assert.equal(risks.sample.target.arrivalB,best.target.arrivalB);
+assert.equal(risks.sample.rows[0].departD,null);
+assert.equal(risks.sample.rows[1].departE,null);
+const studies=fourStudies(best,{risks:{trials:1}});
+assert.equal(studies.winch.length,225);
+assert.ok(studies.timeline.every(v=>Number.isFinite(v.e)));
+console.log('Mixed destinations, shared FIFO capacity, five-station propagation, energy and risk replay passed.');

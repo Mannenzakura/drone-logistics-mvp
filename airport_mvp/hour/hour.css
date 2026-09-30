@@ -1,0 +1,36 @@
+.hour-main{display:block;max-width:1500px;padding:24px}
+.hour-source{background:#eaf4ed;border:1px solid #cfe4d6;border-radius:9px;padding:10px 14px;font-size:12px;color:#315d45;margin-bottom:15px}
+.hours{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px}
+.hours button{padding:8px 2px;font-variant-numeric:tabular-nums}
+.hours button.active{background:#176a54;color:white;border-color:#176a54}
+.hours button:disabled{opacity:.35}
+.hour-main .kpis{grid-template-columns:repeat(6,minmax(0,1fr))}
+.minute-chart{display:grid;grid-template-columns:repeat(60,minmax(0,1fr));gap:2px;height:160px;align-items:end;border-bottom:1px solid #aec4b5;padding:8px 0 0}
+.minute-chart button{height:100%;padding:0;border:0;border-radius:3px 3px 0 0;position:relative;background:#eef4ef;display:flex;align-items:end}
+.minute-chart button.selected{outline:2px solid #176a54;outline-offset:1px}
+.minute-chart button:hover{background:#e0eee3}
+.minute-chart i{width:100%;min-height:2px;background:#66a985;border-radius:3px 3px 0 0}
+.minute-chart button b{position:absolute;top:0;left:50%;width:5px;height:5px;border-radius:50%;transform:translateX(-50%)}
+.minute-chart .queue{background:#5b8fb9}.minute-chart .incident{background:#d4893d;top:7px}.minute-chart .truck{background:#8e72b4;top:14px}
+.hour-transport{display:flex;align-items:center;gap:8px;margin-top:14px}.hour-transport input{flex:1;accent-color:#176a54}
+.hour-panels{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.hour-mini{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.hour-mini>div{padding:10px;border:1px solid #dce7df;border-radius:8px;background:#f8faf8}
+.hour-mini span{display:block;font-size:11px;color:#688071}.hour-mini strong{display:block;font-size:16px;margin-top:4px}
+.hour-list{margin-top:12px;font-size:12px;line-height:1.7}.hour-list>div{border-top:1px solid #e1ebe3;padding:5px 0}
+.hour-events{max-height:380px;overflow:auto;font-size:12px}.hour-events button{width:100%;text-align:left;display:flex;gap:10px;border:0;border-bottom:1px solid #e7eee8;border-radius:0}.hour-events time{white-space:nowrap;color:#176a54}
+.hour-main table{width:100%}
+.hour-scene-panel{padding:18px 20px}
+#hourScene{display:block;width:100%;height:auto;border:1px solid #cddfd1;border-radius:10px;background:#dce9dc}
+#sceneClock{font-variant-numeric:tabular-nums;color:#1d684d}
+.scene-label{font-size:15px;fill:#3b6651;font-weight:700}
+.scene-status{display:flex;gap:16px;flex-wrap:wrap;padding:9px 0 2px;font-size:12px;color:#476d58}
+.scene-status strong{color:#1e684d}
+.scene-plane{filter:drop-shadow(0 2px 2px #274b443d)}
+.scene-flight-id{font-size:12px;font-weight:700;fill:#264d3b;text-anchor:middle}
+.scene-box{fill:#a57d52;stroke:#6c5038;stroke-width:2}
+.scene-truck{fill:#7197a4;stroke:#456c79;stroke-width:3}
+.cargo-active .scene-belt-moving{animation:hourBelt .7s linear infinite}
+@keyframes hourBelt{to{stroke-dashoffset:-22}}
+@media(max-width:1100px){.hours{grid-template-columns:repeat(8,minmax(0,1fr))}.hour-main .kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.hour-panels{grid-template-columns:1fr}.hours{grid-template-columns:repeat(6,minmax(0,1fr))}.hour-main .kpis{grid-template-columns:repeat(2,1fr)}.hour-transport{flex-wrap:wrap}.hour-transport input{flex-basis:100%}}

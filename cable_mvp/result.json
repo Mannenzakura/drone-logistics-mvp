@@ -1,0 +1,446 @@
+{
+  "warning": "ILLUSTRATIVE UNCALIBRATED MODEL, NOT FLIGHT VALIDATION",
+  "method": "Exact rational 2D vertex enumeration for both binary branches",
+  "implementation_version": "1.0",
+  "python_version": "3.12.14",
+  "randomness": "none",
+  "parameters": {
+    "reference_payload": {
+      "exact": "20",
+      "decimal": 20.0
+    },
+    "reference_range": {
+      "exact": "70",
+      "decimal": 70.0
+    },
+    "speed": {
+      "exact": "108",
+      "decimal": 108.0
+    },
+    "distance_ac": {
+      "exact": "30",
+      "decimal": 30.0
+    },
+    "distance_cb": {
+      "exact": "40",
+      "decimal": 40.0
+    },
+    "equipment_mass": {
+      "exact": "2",
+      "decimal": 2.0
+    },
+    "q": {
+      "exact": "10",
+      "decimal": 10.0
+    },
+    "Q": {
+      "exact": "18",
+      "decimal": 18.0
+    },
+    "B": {
+      "exact": "5",
+      "decimal": 5.0
+    },
+    "D": {
+      "exact": "5",
+      "decimal": 5.0
+    },
+    "L": {
+      "exact": "5",
+      "decimal": 5.0
+    },
+    "W": {
+      "exact": "6",
+      "decimal": 6.0
+    },
+    "H": {
+      "exact": "6",
+      "decimal": 6.0
+    },
+    "a": {
+      "exact": "1",
+      "decimal": 1.0
+    },
+    "t0": {
+      "exact": "2",
+      "decimal": 2.0
+    },
+    "td": {
+      "exact": "2/5",
+      "decimal": 0.4
+    },
+    "tl": {
+      "exact": "3/5",
+      "decimal": 0.6
+    },
+    "e0": {
+      "exact": "1/10",
+      "decimal": 0.1
+    },
+    "ed": {
+      "exact": "1/25",
+      "decimal": 0.04
+    },
+    "el": {
+      "exact": "2/25",
+      "decimal": 0.08
+    },
+    "G": {
+      "exact": "13/20",
+      "decimal": 0.65
+    },
+    "bd": {
+      "exact": "4",
+      "decimal": 4.0
+    },
+    "bl": {
+      "exact": "3",
+      "decimal": 3.0
+    },
+    "F": {
+      "exact": "5",
+      "decimal": 5.0
+    }
+  },
+  "solution": {
+    "status": "globally_optimal_exact",
+    "d_kg": {
+      "exact": "5",
+      "decimal": 5.0
+    },
+    "l_kg": {
+      "exact": "10/3",
+      "decimal": 3.3333333333333335
+    },
+    "z": 1,
+    "incremental_profit": {
+      "exact": "25",
+      "decimal": 25.0
+    },
+    "verification": {
+      "duration_min": {
+        "exact": "6",
+        "decimal": 6.0
+      },
+      "incremental_energy_kwh": {
+        "exact": "17/30",
+        "decimal": 0.5666666666666667
+      },
+      "payload_ac_kg": {
+        "exact": "15",
+        "decimal": 15.0
+      },
+      "payload_cb_kg": {
+        "exact": "40/3",
+        "decimal": 13.333333333333334
+      },
+      "connection_slack_min": {
+        "exact": "0",
+        "decimal": 0.0
+      },
+      "airspace_slack_min": {
+        "exact": "0",
+        "decimal": 0.0
+      },
+      "energy_slack_kwh": {
+        "exact": "1/12",
+        "decimal": 0.08333333333333333
+      }
+    },
+    "feasible_vertices_by_branch": {
+      "0": 1,
+      "1": 5
+    },
+    "absolute_optimality_gap": {
+      "exact": "0",
+      "decimal": 0.0
+    }
+  },
+  "boundary_tests": [
+    {
+      "name": "main_hand_proof",
+      "passed": true
+    },
+    {
+      "name": "no_airspace_permission",
+      "passed": true
+    },
+    {
+      "name": "window_too_short",
+      "passed": true
+    },
+    {
+      "name": "no_extra_energy",
+      "passed": true
+    },
+    {
+      "name": "no_demand",
+      "passed": true
+    },
+    {
+      "name": "no_spare_payload",
+      "passed": true
+    },
+    {
+      "name": "loss_making",
+      "passed": true
+    },
+    {
+      "name": "fixed_cost_tie_choose_noop",
+      "passed": true
+    },
+    {
+      "name": "drop_only",
+      "passed": true
+    },
+    {
+      "name": "pickup_only",
+      "passed": true
+    },
+    {
+      "name": "longer_window_energy_binds",
+      "passed": true
+    },
+    {
+      "name": "baseline_overweight",
+      "passed": true
+    }
+  ],
+  "sensitivity": [
+    {
+      "scenario": "connection_only",
+      "parameter": "W",
+      "value": "1",
+      "d_kg": 0.0,
+      "l_kg": 0.0,
+      "z": 0.0,
+      "incremental_profit": 0.0
+    },
+    {
+      "scenario": "connection_only",
+      "parameter": "W",
+      "value": "2",
+      "d_kg": 0.0,
+      "l_kg": 0.0,
+      "z": 0.0,
+      "incremental_profit": 0.0
+    },
+    {
+      "scenario": "connection_only",
+      "parameter": "W",
+      "value": "3",
+      "d_kg": 2.5,
+      "l_kg": 0.0,
+      "z": 1.0,
+      "incremental_profit": 5.0
+    },
+    {
+      "scenario": "connection_only",
+      "parameter": "W",
+      "value": "4",
+      "d_kg": 5.0,
+      "l_kg": 0.0,
+      "z": 1.0,
+      "incremental_profit": 15.0
+    },
+    {
+      "scenario": "connection_only",
+      "parameter": "W",
+      "value": "5",
+      "d_kg": 5.0,
+      "l_kg": 1.6666666666666667,
+      "z": 1.0,
+      "incremental_profit": 20.0
+    },
+    {
+      "scenario": "connection_only",
+      "parameter": "W",
+      "value": "6",
+      "d_kg": 5.0,
+      "l_kg": 3.3333333333333335,
+      "z": 1.0,
+      "incremental_profit": 25.0
+    },
+    {
+      "scenario": "connection_only",
+      "parameter": "W",
+      "value": "8",
+      "d_kg": 5.0,
+      "l_kg": 3.3333333333333335,
+      "z": 1.0,
+      "incremental_profit": 25.0
+    },
+    {
+      "scenario": "both_windows",
+      "parameter": "W",
+      "value": "1",
+      "d_kg": 0.0,
+      "l_kg": 0.0,
+      "z": 0.0,
+      "incremental_profit": 0.0
+    },
+    {
+      "scenario": "both_windows",
+      "parameter": "W",
+      "value": "2",
+      "d_kg": 0.0,
+      "l_kg": 0.0,
+      "z": 0.0,
+      "incremental_profit": 0.0
+    },
+    {
+      "scenario": "both_windows",
+      "parameter": "W",
+      "value": "3",
+      "d_kg": 2.5,
+      "l_kg": 0.0,
+      "z": 1.0,
+      "incremental_profit": 5.0
+    },
+    {
+      "scenario": "both_windows",
+      "parameter": "W",
+      "value": "4",
+      "d_kg": 5.0,
+      "l_kg": 0.0,
+      "z": 1.0,
+      "incremental_profit": 15.0
+    },
+    {
+      "scenario": "both_windows",
+      "parameter": "W",
+      "value": "5",
+      "d_kg": 5.0,
+      "l_kg": 1.6666666666666667,
+      "z": 1.0,
+      "incremental_profit": 20.0
+    },
+    {
+      "scenario": "both_windows",
+      "parameter": "W",
+      "value": "6",
+      "d_kg": 5.0,
+      "l_kg": 3.3333333333333335,
+      "z": 1.0,
+      "incremental_profit": 25.0
+    },
+    {
+      "scenario": "both_windows",
+      "parameter": "W",
+      "value": "7",
+      "d_kg": 5.0,
+      "l_kg": 4.375,
+      "z": 1.0,
+      "incremental_profit": 28.125
+    },
+    {
+      "scenario": "both_windows",
+      "parameter": "W",
+      "value": "8",
+      "d_kg": 5.0,
+      "l_kg": 4.375,
+      "z": 1.0,
+      "incremental_profit": 28.125
+    },
+    {
+      "scenario": "energy",
+      "parameter": "G",
+      "value": ".1",
+      "d_kg": 0.0,
+      "l_kg": 0.0,
+      "z": 0.0,
+      "incremental_profit": 0.0
+    },
+    {
+      "scenario": "energy",
+      "parameter": "G",
+      "value": ".2",
+      "d_kg": 2.5,
+      "l_kg": 0.0,
+      "z": 1.0,
+      "incremental_profit": 5.0
+    },
+    {
+      "scenario": "energy",
+      "parameter": "G",
+      "value": ".3",
+      "d_kg": 5.0,
+      "l_kg": 0.0,
+      "z": 1.0,
+      "incremental_profit": 15.0
+    },
+    {
+      "scenario": "energy",
+      "parameter": "G",
+      "value": ".4",
+      "d_kg": 5.0,
+      "l_kg": 1.25,
+      "z": 1.0,
+      "incremental_profit": 18.75
+    },
+    {
+      "scenario": "energy",
+      "parameter": "G",
+      "value": ".5",
+      "d_kg": 5.0,
+      "l_kg": 2.5,
+      "z": 1.0,
+      "incremental_profit": 22.5
+    },
+    {
+      "scenario": "energy",
+      "parameter": "G",
+      "value": ".65",
+      "d_kg": 5.0,
+      "l_kg": 3.3333333333333335,
+      "z": 1.0,
+      "incremental_profit": 25.0
+    },
+    {
+      "scenario": "fixed_cost",
+      "parameter": "F",
+      "value": "0",
+      "d_kg": 5.0,
+      "l_kg": 3.3333333333333335,
+      "z": 1.0,
+      "incremental_profit": 30.0
+    },
+    {
+      "scenario": "fixed_cost",
+      "parameter": "F",
+      "value": "5",
+      "d_kg": 5.0,
+      "l_kg": 3.3333333333333335,
+      "z": 1.0,
+      "incremental_profit": 25.0
+    },
+    {
+      "scenario": "fixed_cost",
+      "parameter": "F",
+      "value": "20",
+      "d_kg": 5.0,
+      "l_kg": 3.3333333333333335,
+      "z": 1.0,
+      "incremental_profit": 10.0
+    },
+    {
+      "scenario": "fixed_cost",
+      "parameter": "F",
+      "value": "30",
+      "d_kg": 0.0,
+      "l_kg": 0.0,
+      "z": 0.0,
+      "incremental_profit": 0.0
+    },
+    {
+      "scenario": "fixed_cost",
+      "parameter": "F",
+      "value": "40",
+      "d_kg": 0.0,
+      "l_kg": 0.0,
+      "z": 0.0,
+      "incremental_profit": 0.0
+    }
+  ],
+  "runtime_seconds": 0.041470899999694666
+}

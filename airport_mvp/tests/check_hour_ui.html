@@ -1,0 +1,22 @@
+<!doctype html><meta charset="utf-8"><title>Hour view smoke check</title>
+<body data-result="pending"><iframe id="page" src="../hour/" style="width:1400px;height:1000px;border:0"></iframe>
+<script>
+const frame=document.getElementById('page');
+frame.addEventListener('load',()=>{
+  const doc=frame.contentDocument;
+  function ready(){
+    if(!doc.querySelector('#minuteChart button')){setTimeout(ready,50);return}
+    doc.getElementById('nextEvent').click();
+    const before=doc.getElementById('sceneClock').textContent;
+    doc.getElementById('playHour').click();
+    setTimeout(()=>{
+      const after=doc.getElementById('sceneClock').textContent;
+      const planes=doc.querySelectorAll('#flightLayer .scene-plane').length;
+      const cargo=doc.querySelectorAll('#cargoLayer .scene-box').length;
+      document.body.dataset.result=before!==after&&planes>0&&cargo>0?'pass':'fail';
+      document.body.dataset.details=`${before} -> ${after}, planes=${planes}, cargo=${cargo}`;
+    },1900);
+  }
+  ready();
+});
+</script>

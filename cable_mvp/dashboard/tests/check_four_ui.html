@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8"><title>Four-station and legacy smoke check</title>
+<body data-result="pending"><iframe id="four" src="../static/" style="width:1300px;height:950px"></iframe><iframe id="three" src="../static/three/" style="width:1000px;height:400px"></iframe>
+<script>
+let count=0;const timer=setInterval(()=>{
+ const a=document.getElementById('four').contentDocument,b=document.getElementById('three').contentDocument;
+ if(!a?.getElementById('summary')?.querySelector('strong')||!b?.getElementById('dropValue')||!b?.getElementById('runFifo'))return;
+ clearInterval(timer);const before=a.getElementById('clock').textContent;
+ a.getElementById('seek').value=500;a.getElementById('seek').dispatchEvent(new Event('input',{bubbles:true}));
+ const after=a.getElementById('clock').textContent,planes=a.querySelectorAll('#scenePlanes path').length,rows=a.querySelectorAll('#flightRows tr').length,sens=a.querySelectorAll('#sensitivityRows tr').length;
+ const ledger=a.querySelectorAll('#cargoRows tr').length===4&&a.querySelectorAll('#costRows tr').length===6;
+ a.getElementById('p_referenceRange').value=50;a.getElementById('form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+ const rangeBlocked=!a.getElementById('error').hidden&&a.getElementById('error').textContent.includes('总航程');
+ a.getElementById('p_referenceRange').value=110;a.getElementById('p_winchCapacity').value=1;
+ a.getElementById('form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+ const winchApplied=a.getElementById('error').hidden&&[...a.querySelectorAll('#summary strong')].slice(0,3).every(n=>parseFloat(n.textContent)<=1.001);
+ document.body.dataset.result=before!==after&&planes===6&&rows===6&&sens===3&&ledger&&rangeBlocked&&winchApplied?'pass':'fail';
+ document.body.dataset.details=`${before} -> ${after}; planes=${planes}; flights=${rows}; sensitivity=${sens}; ledger=${ledger}; range=${rangeBlocked}; winch=${winchApplied}; old=${b.getElementById('dropValue').textContent}`;
+},100);
+setTimeout(()=>{if(document.body.dataset.result==='pending'){clearInterval(timer);document.body.dataset.result='timeout';const a=document.getElementById('four').contentDocument,b=document.getElementById('three').contentDocument;document.body.dataset.details=`four=${a?.getElementById('summary')?.textContent?.slice(0,60)} error=${a?.getElementById('error')?.textContent}; three=${b?.getElementById('dropValue')?.textContent}`}},12000);
+</script>

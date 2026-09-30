@@ -1,0 +1,8 @@
+<!doctype html><meta charset="utf-8"><body data-result="pending"><iframe id="app" src="../static/" style="width:1400px;height:1000px"></iframe><script>
+const timer=setInterval(()=>{const d=document.getElementById('app').contentDocument;if(d?.querySelectorAll('#fourWinchMap rect').length!==225)return;clearInterval(timer);
+ const f=d.querySelectorAll('#fourFormationMap rect').length,q=d.querySelectorAll('#fourFifoRows tr').length;
+ const hover=(map,index)=>d.querySelectorAll(`#${map} rect`)[index].dispatchEvent(new PointerEvent('pointermove',{bubbles:true}));
+ hover('fourWinchMap',0);const w0=d.getElementById('fourWinchDetail').textContent;hover('fourWinchMap',14);const w1=d.getElementById('fourWinchDetail').textContent;
+ hover('fourFormationMap',0);const r0=d.getElementById('fourFormationDetail').textContent;hover('fourFormationMap',14);const r1=d.getElementById('fourFormationDetail').textContent;
+ document.body.dataset.result=f===225&&q===6&&w0!==w1&&r0!==r1?'pass':'fail';document.body.dataset.details=`winch=225 formation=${f} fifo=${q} winchHover=${w0!==w1} formationHover=${r0!==r1}`},100);
+</script>

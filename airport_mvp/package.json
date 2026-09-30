@@ -1,0 +1,9 @@
+{
+  "name": "airport-mvp",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Standalone local drone airport sandbox",
+  "dependencies": {
+    "three": "0.186.1"
+  }
+}

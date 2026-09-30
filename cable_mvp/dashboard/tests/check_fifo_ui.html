@@ -1,0 +1,25 @@
+<!doctype html><meta charset="utf-8"><title>FIFO panel smoke test</title>
+<body data-result="pending"><iframe id="app" src="../static/index.html" style="width:1200px;height:1000px"></iframe>
+<script>
+const frame=document.getElementById('app');
+frame.addEventListener('load',()=>{
+  const doc=frame.contentDocument;
+  const poll=setInterval(()=>{
+    if(!doc.getElementById('runFifo')||!doc.getElementById('fifoStatus'))return;
+    clearInterval(poll);doc.getElementById('runFifo').click();
+    const check=setInterval(()=>{
+      const status=doc.getElementById('fifoStatus').textContent;
+      if(status.includes('正在计算'))return;
+      if(!status.includes('主动画已同步')||doc.getElementById('runFifo').disabled)return;
+      clearInterval(check);
+      const rows=doc.querySelectorAll('#fifoRows tr').length;
+      const cases=doc.querySelectorAll('#fifoScenarios tr').length;
+      const overlay=doc.getElementById('fifoOverlay');
+      const planes=doc.querySelectorAll('#fifoPlanes use').length;
+      document.body.dataset.result=rows===5&&cases===3&&overlay.style.display!== 'none'&&planes>0?'pass':'fail';
+      document.body.dataset.details=`rows=${rows}, scenarios=${cases}, queuePlanes=${planes}, ${status.slice(0,70)}`;
+    },100);
+  },100);
+});
+setTimeout(()=>{if(document.body.dataset.result==='pending'){document.body.dataset.result='timeout';const d=frame.contentDocument;document.body.dataset.details=`${d?.getElementById('fifoStatus')?.textContent||'not loaded'}; cases=${d?.querySelectorAll('#fifoScenarios tr').length}; disabled=${d?.getElementById('runFifo')?.disabled}`}},12000);
+</script>

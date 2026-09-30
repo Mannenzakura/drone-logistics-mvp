@@ -1,0 +1,84 @@
+<svg id="scene" viewBox="0 0 1200 670" role="img" aria-label="低空货运机场示意：跑道、联络道、停机位、货运库、货车入口、装卸月台、机场外索降区及空域等待点">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e7f0f4"/><stop offset="1" stop-color="#f5f8f1"/></linearGradient>
+    <linearGradient id="grass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c9dfc9"/><stop offset="1" stop-color="#a9c7ac"/></linearGradient>
+    <linearGradient id="runway" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#596b70"/><stop offset="1" stop-color="#3b5057"/></linearGradient>
+    <linearGradient id="roof" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e7eceb"/><stop offset="1" stop-color="#b8c9c8"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#587765" flood-opacity=".2"/></filter>
+    <marker id="routeArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="#678f83"/></marker>
+  </defs>
+  <rect width="1200" height="670" fill="url(#sky)"/>
+  <path d="M0 420L530 130L1200 390V670H0Z" fill="url(#grass)"/>
+  <path d="M0 574L520 280L1200 546" fill="none" stroke="#8eb393" stroke-width="18" opacity=".5"/>
+  <path d="M88 460L700 148L1138 342L515 651Z" fill="#c4d8c1" stroke="#81a48a" stroke-width="4" filter="url(#shadow)"/>
+  <path d="M88 460L700 148L1138 342L515 651Z" fill="none" stroke="#f3f7ef" stroke-width="5" stroke-dasharray="14 8" opacity=".9"/>
+  <text x="729" y="155" class="scene-label">低空货运机场边界</text>
+
+  <!-- Landing strip is visual context; its capacity is not a separate model resource. -->
+  <polygon points="319,360 843,185 925,225 400,399" fill="url(#runway)" stroke="#35494e" stroke-width="4" filter="url(#shadow)"/>
+  <path d="M365 374L880 205" stroke="#f6f3e7" stroke-width="4" stroke-dasharray="23 19"/>
+  <path d="M335 364L404 394 M839 190L907 222" stroke="#fff" stroke-width="3" stroke-dasharray="7 5"/>
+  <text x="577" y="254" transform="rotate(-18 577 254)" class="runway-label">跑道 / 进离场方向示意</text>
+  <path data-zone="taxiway" class="zone-hotspot" d="M420 398L465 391L500 423L455 441Z" fill="#718b87" stroke="#eae6cc" stroke-width="3"/>
+  <path d="M434 409L479 420" stroke="#f7efcf" stroke-width="3" stroke-dasharray="9 7"/>
+  <text data-zone="taxiway" x="394" y="457" class="scene-small zone-hotspot">滑行联络道 · 示意</text>
+
+  <!-- Raised apron and taxi/service lane. -->
+  <polygon points="390,439 822,285 1051,389 614,551" fill="#71917f" opacity=".35"/>
+  <polygon points="386,426 822,272 1051,376 612,538" fill="#dce7df" stroke="#8eada0" stroke-width="3" filter="url(#shadow)"/>
+  <path d="M448 422L812 295L982 379" fill="none" stroke="#f8fbf7" stroke-width="6" stroke-dasharray="24 16"/>
+  <path d="M426 443L788 316" fill="none" stroke="#89aaa1" stroke-width="3"/>
+  <g id="padSlots"></g>
+  <text x="445" y="484" class="apron-label zone-hotspot" data-zone="apron">垂直起降坪 / 停机位</text>
+  <text x="446" y="505" class="scene-small">无人机进入后占位，货运结束并离场才释放</text>
+
+  <!-- Cargo warehouse, loading side and boxes. -->
+  <path data-zone="truckGate" class="zone-hotspot" d="M667 617L1032 525L1172 560L819 654Z" fill="#82998f" stroke="#e8edda" stroke-width="3"/>
+  <path d="M712 617L1063 546" stroke="#f4edd3" stroke-width="4" stroke-dasharray="23 15"/>
+  <rect data-zone="truckGate" class="zone-hotspot" x="1046" y="568" width="132" height="27" rx="8" fill="#fff7e7"/>
+  <text data-zone="truckGate" x="1054" y="587" class="scene-small zone-hotspot">货车专用入口 →</text>
+  <polygon points="833,462 978,413 1110,467 967,519" fill="url(#roof)" stroke="#889da0" stroke-width="2" filter="url(#shadow)"/>
+  <polygon points="833,462 967,519 967,586 833,530" fill="#91a8aa" stroke="#748e90" stroke-width="2"/>
+  <polygon points="967,519 1110,467 1110,537 967,586" fill="#c1d0ce" stroke="#889f9c" stroke-width="2"/>
+  <polygon points="849,488 889,504 889,546 849,530" fill="#4d7679"/><polygon points="902,509 942,525 942,566 902,550" fill="#4d7679"/>
+  <text x="934" y="466" transform="rotate(17 934 466)" class="warehouse-label">货运库 / 分拣中心</text>
+  <path data-zone="truckDock" class="zone-hotspot" d="M831 542L966 590L1093 548L1093 579L967 624L831 573Z" fill="#b7ad91" stroke="#8b886b" stroke-width="2"/>
+  <text data-zone="truckDock" x="863" y="586" class="scene-small zone-hotspot">货车装卸月台 · 点击查看</text>
+  <g data-zone="truckDock" class="zone-hotspot" transform="translate(875 596)"><rect x="0" y="0" width="73" height="25" rx="4" fill="#e7ede3" stroke="#5b766b"/><rect x="72" y="4" width="25" height="21" rx="3" fill="#2c756b"/><circle cx="18" cy="27" r="6" fill="#35433e"/><circle cx="80" cy="27" r="6" fill="#35433e"/></g>
+  <path d="M680 517L832 552" stroke="#a87b55" stroke-width="13" stroke-dasharray="20 11" opacity=".65"/>
+  <text x="675" y="567" class="scene-small">地面装卸通道</text>
+  <g id="cargoIcons"></g>
+
+  <!-- Tower. -->
+  <polygon points="987,274 1025,260 1059,274 1020,288" fill="#d8e4e1" stroke="#829d9e"/>
+  <polygon points="987,274 1020,288 1020,364 987,350" fill="#92adb1"/>
+  <polygon points="1020,288 1059,274 1059,350 1020,364" fill="#bbd0d0"/>
+  <polygon points="975,258 1026,240 1072,258 1020,277" fill="#557c86" stroke="#3e6670" stroke-width="2"/>
+  <polygon points="975,258 1020,277 1020,291 975,273" fill="#568da0"/>
+  <polygon points="1020,277 1072,258 1072,274 1020,291" fill="#74a7b4"/>
+  <text x="1068" y="315" class="scene-small">塔台</text>
+
+  <!-- Off-airport transfer area. -->
+  <ellipse data-zone="outside" data-slot="0" class="zone-hotspot" cx="205" cy="528" rx="143" ry="91" fill="#e9dfc0" stroke="#bb9c60" stroke-width="3" stroke-dasharray="9 7" filter="url(#shadow)"/>
+  <path d="M103 528H307M205 450V606" stroke="#c8a771" stroke-width="2" opacity=".6"/>
+  <g id="outsideSlots"></g>
+  <rect x="75" y="610" width="282" height="35" rx="17" fill="#fff8e9" stroke="#dcc899"/>
+  <text x="95" y="633" class="offsite-label">机场外索降区 · 不占机场停机位</text>
+
+  <!-- Waiting and departure airspace above ground plane. -->
+  <ellipse cx="158" cy="159" rx="116" ry="57" fill="#dbe9f1" stroke="#99bdce" stroke-width="2" stroke-dasharray="7 6"/>
+  <path d="M82 169C132 105 188 206 237 151" fill="none" stroke="#8ab2c2" stroke-width="3" stroke-dasharray="8 8"/>
+  <text x="100" y="93" class="air-label">进场等待空域</text><text x="106" y="111" class="scene-small">等待放行 / 可产生耗电</text>
+  <ellipse cx="1045" cy="130" rx="106" ry="54" fill="#dcebf3" stroke="#99bdce" stroke-width="2" stroke-dasharray="7 6"/>
+  <text x="1002" y="136" class="air-label">离场空域</text>
+  <path d="M241 170C332 150 417 208 495 292" fill="none" stroke="#678f83" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#routeArrow)"/>
+  <path d="M234 196C198 267 187 364 200 437" fill="none" stroke="#b48c50" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#routeArrow)"/>
+  <path d="M800 296C893 212 924 175 950 151" fill="none" stroke="#678f83" stroke-width="3" stroke-dasharray="8 7" marker-end="url(#routeArrow)"/>
+  <path d="M295 490C600 78 816 54 946 123" fill="none" stroke="#b48c50" stroke-width="2.5" stroke-dasharray="8 9" marker-end="url(#routeArrow)" opacity=".8"/>
+
+  <g id="hotspots"><polygon data-zone="warehouse" points="833,462 978,413 1110,467 1110,537 967,586 833,530" fill="transparent" class="zone-hotspot"/></g><g id="planes"></g>
+  <rect x="24" y="18" width="488" height="31" rx="15" fill="#ffffff" opacity=".9"/>
+  <text x="40" y="39" class="map-caption">低空货运机场沙盘 · 各区域位置与飞机轨迹为示意</text>
+  <text x="565" y="643" class="scene-small">跑道、塔台和建筑仅辅助识别；本版只计算共享空域、起降位、场外作业位与货运团队容量。</text>
+</svg>
+

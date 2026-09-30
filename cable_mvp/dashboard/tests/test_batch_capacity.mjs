@@ -1,0 +1,53 @@
+import assert from 'node:assert/strict';
+import {boardFifo} from '../static/network/engine.mjs';
+import {FOUR_DEFAULTS,evaluateFour,scheduleFour,cruiseFour,validateFour} from '../static/four_model.mjs';
+import {stationTrips,batchPressure} from '../static/batch_capacity.mjs';
+import {fourRisks} from '../static/four_studies.mjs';
+const zeroRisk={arrivalJitter:0,serviceJitterC:0,serviceJitterD:0,transitJitter:0,cancelChance:0,trials:1};
+const flights=Array.from({length:7},(_,id)=>({id,arrival:0,ready:0,departure:null}));
+const raw=boardFifo(flights,[{time:1,seats:3,local:7,plannedSize:10},{time:2,seats:0,local:10,plannedSize:10},{time:3,seats:4,local:6,plannedSize:10}],2,'C');
+assert.deepEqual(raw.flights.map(f=>f.departure),[1,1,1,3,3,3,3]);
+assert.deepEqual(raw.batches.map(b=>b.actualSize),[10,10,10]);
+assert.equal(raw.events.filter(e=>e.type==='noSeats').length,1);
+assert.equal(raw.events.filter(e=>e.type==='cancel').length,0);
+const p={...FOUR_DEFAULTS,capacityMode:1,battery:8,arrivalsC:[0,0,0],backgroundServiceC:[0,0,0],backgroundServiceD:[0,0,0],target:2,
+  cd:1.8,db:1.8,de:1.8,eb:1.8,speed:108,destinations:['D','B','B'],
+  departuresC:[1,2,3],batchSizeC:[10,10,10],batchLocalC:[7,10,6],batchReservedC:[0,0,0],
+  departuresD:[3,4,5],batchSizeD:[10,10,10],batchLocalD:[8,10,8],batchReservedD:[0,0,0]};
+const r=evaluateFour(p,0,0,0);
+assert.equal(r.target.departC,1);
+assert.equal(r.target.formationC,10);
+assert.equal(r.schedule.rows[0].departD,null,'Terminal D must release downstream seats');
+assert.equal(r.target.formationD,10);
+assert.deepEqual(r.schedule.batches.filter(b=>b.station==='C').map(b=>b.capacity),[3,0,4]);
+const underfilled=evaluateFour({...p,batchLocalC:[1,1,1],batchReservedC:[2,2,2]},0,0,0);
+assert.equal(underfilled.target.formationC,4,'Two held-empty slots must not count as aircraft');
+assert.ok(Math.abs(underfilled.legGammas.C-(1-.6*.1*3/4))<1e-10);
+assert.ok(underfilled.legGammas.C>r.legGammas.C,'Underfilled group must receive a smaller wake benefit');
+const fiveP={...p,stationCount:5,destinations:['D','E','B'],departuresE:[5,6,7],batchSizeE:[10,10,10],batchLocalE:[8,10,6],batchReservedE:[1,0,0]};
+const five=evaluateFour(fiveP,0,0,0);
+assert.equal(five.schedule.rows[1].departE,null,'Terminal E must not take E→B capacity');
+assert.equal(five.target.departE,5);
+assert.equal(five.target.formationE,9);
+assert.ok(five.legGammas.E!==five.legGammas.D);
+assert.ok(Math.abs(five.eDB-five.eDE-five.eEB)<1e-10);
+const replay=fourRisks(five,zeroRisk);
+assert.equal(replay.sample.target.arrivalB,five.target.arrivalB);
+assert.ok(Math.abs(replay.sample.energy-five.energy)<1e-10);
+const altered=fourRisks(five,{...zeroRisk,arrivalJitter:3,serviceJitterC:3,transitJitter:2,trials:5});
+if(altered.sample.target.arrivalB!==null){const c=cruiseFour(fiveP,altered.sample.target,0,0,0);assert.ok(Math.abs(altered.sample.energy-(c.eAC+c.eCD+c.eDB+five.eHandle+fiveP.loiterRate*(altered.sample.target.waitC+altered.sample.target.waitD+altered.sample.target.waitE+altered.sample.target.transitDelay)))<1e-10)}
+const noSeats={...p,batchLocalC:[10,10,10]};
+assert.equal(evaluateFour(noSeats,0,0,0),null);
+const queued=scheduleFour(noSeats,0,0);
+assert.equal(queued.rows[2].arrivalD,null);
+const pressure=batchPressure(noSeats,queued)[0];
+assert.equal(pressure.unserved,3);assert.equal(pressure.meanWait,null);assert.equal(pressure.zeroTrips,3);
+assert.throws(()=>validateFour({...p,batchLocalC:[11,10,6]}),/超过/);
+assert.throws(()=>validateFour({...p,batchLocalC:[7,10]}),/班次数一致/);
+assert.throws(()=>validateFour({...p,batchLocalC:[0,10,6]}),/领航/);
+assert.throws(()=>validateFour({...p,batchReservedC:[.5,0,0]}),/整数/);
+const cancelled=boardFifo([{id:0,arrival:0,ready:0,departure:null}],[{time:1,seats:3,local:7,cancelled:true},{time:2,seats:0,local:10,cancelled:false}],2,'C');
+assert.equal(cancelled.batches[0].unused,0);assert.equal(cancelled.batches[1].actualSize,10);
+assert.deepEqual(cancelled.events.map(e=>e.type),['cancel','noSeats']);
+assert.deepEqual(stationTrips(p,'C').map(t=>t.seats),[3,0,4]);
+console.log('Variable batch capacity, zero-seat departures, terminal exits, actual-size energy, risk replay and invalid rosters passed.');

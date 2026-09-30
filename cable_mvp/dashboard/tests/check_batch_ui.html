@@ -1,0 +1,29 @@
+<!doctype html><meta charset="utf-8"><title>逐班位次交互核验</title>
+<body data-result="pending"><p id="result">检查中</p><iframe id="app" src="../static/" style="width:1400px;height:1000px"></iframe>
+<script>
+let started=false;
+const timer=setInterval(()=>{
+ const d=document.querySelector('#app').contentDocument;
+ if(started||!d?.querySelector('#summary strong')||!d.querySelector('#batchResults tr'))return;
+ started=true;clearInterval(timer);
+ try{
+  const assert=(condition,text)=>{if(!condition)throw new Error(text)};
+  assert(d.querySelector('#p_capacityMode').value==='1','默认未启用逐班模式');
+  let rows=[...d.querySelectorAll('#batchResults tr')].filter(r=>r.dataset.station==='C');
+  assert(rows[0].children[6].textContent==='3'&&rows[1].children[6].textContent==='0'&&rows[2].children[6].textContent==='4','3/0/4 位次没有进入排程');
+  d.querySelector('#p_battery').value='8';d.querySelector('#mode5').click();d.querySelector('#form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+  assert(d.querySelector('#error').hidden,'五站没有成功应用');assert(d.querySelector('#sceneStations').textContent.includes('E'),'五站动画缺 E');
+  const edit=d.querySelector('#batchEditors tr[data-station="C"] input[data-key="batchLocal"]');edit.value='11';edit.dispatchEvent(new Event('input',{bubbles:true}));
+  const previous=d.querySelector('#summary').textContent;d.querySelector('#form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+  assert(!d.querySelector('#error').hidden&&d.querySelector('#summary').textContent===previous,'错误配置没有保留上一成功结果');
+  edit.value='7';d.querySelector('#form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));assert(d.querySelector('#error').hidden,'修正后无法恢复');
+  const phase=[...d.querySelectorAll('#phases button')].find(b=>b.textContent.startsWith('E 到达'));phase.click();
+  assert(d.querySelector('#sceneQueues').textContent.includes('中转位'),'动画未显示逐班空位');
+  d.querySelector('#seek').value='1000';d.querySelector('#seek').dispatchEvent(new Event('input',{bubbles:true}));
+  const displayed=Number(d.querySelector('#telemetry div:nth-child(3) b').textContent.split(' ')[0]);
+  const planned=Number(d.querySelector('#stationStats').textContent.match(/计划耗电 ([0-9.]+)/)[1]);assert(Math.abs(displayed-planned)<.011,'动画耗电与实际规模排程不一致');
+  document.body.dataset.result='pass';document.querySelector('#result').textContent='通过：四站/五站，3/0/4 逐班容量，错误保护，动画和账本耗电一致';
+ }catch(error){document.body.dataset.result='fail';document.querySelector('#result').textContent=error.message}
+},100);
+setTimeout(()=>{if(!started){clearInterval(timer);document.body.dataset.result='timeout';document.querySelector('#result').textContent='页面初始化超时'}},15000);
+</script>

@@ -1,0 +1,22 @@
+<!doctype html><meta charset="utf-8"><title>Network view smoke test</title>
+<body data-result="pending"><iframe id="view" src="../static/network/" style="width:1400px;height:1000px"></iframe>
+<script>
+const view=document.getElementById('view');
+view.addEventListener('load',()=>{
+ const d=view.contentDocument;
+ const poll=setInterval(()=>{
+   if(d.querySelectorAll('#rows tr').length!==6)return;
+   clearInterval(poll);
+   const initial=d.getElementById('clock').textContent;
+   d.getElementById('play').click();
+   d.getElementById('seek').value=500;
+   d.getElementById('seek').dispatchEvent(new Event('input',{bubbles:true}));
+   const now=d.getElementById('clock').textContent;
+   const planes=d.querySelectorAll('#planes path').length;
+   const events=d.querySelectorAll('#events .event').length;
+   document.body.dataset.result=initial!==now&&planes===6&&events>10?'pass':'fail';
+   document.body.dataset.details=`${initial} -> ${now}, planes=${planes}, events=${events}`;
+ },100);
+});
+setTimeout(()=>{if(document.body.dataset.result==='pending')document.body.dataset.result='timeout'},8000);
+</script>
