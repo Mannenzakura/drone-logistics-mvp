@@ -17,6 +17,6 @@ export function liveMetrics(x,time){
  {name:'lHub',kg:x.lD,fee:p.feeLoadD,timeValue:p.timeLoadD,handling:p.handlingLoadD,from:t.arrivalD,to:t.arrivalB,delivery:t.arrivalB,handled:d.loadEnd}].map(g=>({...g,delivered:now>=g.delivery?g.kg:0,revenue:now>=g.delivery?g.kg*g.fee:0,timeCost:g.kg*g.timeValue*Math.max(0,Math.min(now,g.to)-g.from),handlingCost:now>=g.handled?g.kg*g.handling:0}));
  const revenue=goods.reduce((v,g)=>v+g.revenue,0),timeCost=goods.reduce((v,g)=>v+g.timeCost,0),handling=goods.reduce((v,g)=>v+g.handlingCost,0),fixed=p.fixedCostC*x.zC*Number(now>=cStart)+p.fixedCostD*x.zD*Number(now>=t.arrivalD);
  const net=revenue-timeCost-handling-fixed-p.energyPrice*energy;
- const stage=now<t.arrivalC?'A→C 飞行':now<t.departC?(now<cStart?'C 设备排队':now<cStart+x.workC?'C 装卸作业':'C FIFO 等待'):now<t.arrivalD?'C→分支站 编队':now<t.departD?(now<t.arrivalD+x.workD?'分支站装卸作业':'分支站 FIFO 等待'):now<t.arrivalB?'分支站→B 编队':'B 已交付';
+ const stage=now<start?'尚未产生':now<t.arrivalC?'A→C 飞行':now<t.departC?(now<cStart?'C 设备排队':now<cStart+x.workC?'C 装卸作业':'C FIFO 等待'):now<t.arrivalD?'C→分支站 编队':now<t.departD?(now<t.arrivalD+x.workD?'分支站装卸作业':'分支站 FIFO 等待'):now<t.arrivalB?'分支站→B 编队':'B 已交付';
  return {mass,energy,waitC,waitD,saving:x.savingCD*b+x.savingDB*end,goods,revenue,timeCost,handling,fixed,net,stage};
 }

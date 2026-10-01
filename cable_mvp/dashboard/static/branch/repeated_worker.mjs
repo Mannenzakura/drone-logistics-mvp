@@ -1,2 +1,3 @@
-import {repeatBranch} from './repeated.mjs?v=20261001-paired9';
-self.onmessage=({data})=>{try{const result=repeatBranch(data.plan,data.options,(done,total)=>self.postMessage({progress:done,total}));self.postMessage({result})}catch(e){self.postMessage({error:e.message})}};
+import {repeatFull} from './full_repeat.mjs?v=20261001-full10';
+import {repeatBranch} from './repeated.mjs?v=20261001-full10';
+self.onmessage=({data})=>{try{const result=(data.plan.p.demandMode===1?repeatFull:repeatBranch)(data.plan,data.options,(done,total)=>self.postMessage({progress:done,total}));self.postMessage({result})}catch(e){self.postMessage({error:e.message})}};

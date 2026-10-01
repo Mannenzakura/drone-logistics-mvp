@@ -1,6 +1,7 @@
-import {sharedCService} from './shared_service.mjs?v=20261001-paired9';
-import {boardFifo} from './network/engine.mjs?v=20261001-paired9';
-import {stationTrips,validateBatchCapacity} from './batch_capacity.mjs?v=20261001-paired9';
+import {flowSchedule} from './branch/network_flow.mjs?v=20261001-full10';
+import {sharedCService} from './shared_service.mjs?v=20261001-full10';
+import {boardFifo} from './network/engine.mjs?v=20261001-full10';
+import {stationTrips,validateBatchCapacity} from './batch_capacity.mjs?v=20261001-full10';
 
 export const FOUR_DEFAULTS={
   serviceEnabledC:0,serviceServersC:1,capacityMode:0,waitWarning:15,localWarmup:4,localRateC:1.4,localRateD:1.4,localRateE:1.4,batchSeed:20260930,batchMax:10,batchReserve:0,localProbabilityC:0.8,localProbabilityD:0.8,localProbabilityE:0.8,
@@ -40,7 +41,7 @@ export function validateFour(input){
     if(p.de<=0||p.eb<=0)throw new Error('五站航段距离须大于 0');
   }
   for(const key of ['arrivalsC','backgroundServiceC','backgroundServiceD','departuresC','departuresD']){
-    if(!Array.isArray(p[key])||!p[key].length||p[key].length>48)throw new Error(`${key} 须为非空列表，最多 48 项`);
+    if(!Array.isArray(p[key])||!p[key].length||p[key].length>(p.fullJobs&&['arrivalsC','backgroundServiceC','backgroundServiceD'].includes(key)?128:48))throw new Error(`${key} 须为非空列表，最多 48 项`);
     p[key].forEach(v=>finiteNonnegative(v,key));
   }
   if(p.backgroundServiceC.length!==p.arrivalsC.length||p.backgroundServiceD.length!==p.arrivalsC.length)throw new Error('背景作业时间的项数须与飞机数一致');
@@ -64,7 +65,7 @@ export function effectivePayload(p){
   const reference=p.enforceReferencePayload?Math.min(20,37.5-(routeDistance(p))/4):Infinity;
   return Math.max(0,Math.min(p.payloadLimit,reference-p.hardwareMass-p.boxMass-p.mountMass));
 }
-function winchTimes(p,dC,lC,lD){
+export function winchTimes(p,dC,lC,lD){
   if(!p.winchTiming)return {workC:(dC+lC>EPS?1:0)*p.t0C+p.tDropC*dC+p.tLoadC*lC,
     workD:(lC+lD>EPS?1:0)*p.t0D+p.tDropD*lC+p.tLoadD*lD};
   const tau=(seconds,slope)=>Math.max(0,seconds/60+slope*(p.winchHeight-20));
@@ -89,6 +90,7 @@ export function cruiseFour(p,target,dC,lC,lD){
 }
 
 export function scheduleFour(p,workC,workD,options={}){
+  if(p.fullJobs)return flowSchedule(p,workC,workD,options);
   const destinations=flightDestinations(p),five=p.stationCount===5;
   const stations=five?['C','D','E']:['C','D'];
   const rows=p.arrivalsC.map((arrivalC,id)=>({id,destination:destinations[id],arrivalC:arrivalC+(options.arrivalDelay?.[id]??0),
