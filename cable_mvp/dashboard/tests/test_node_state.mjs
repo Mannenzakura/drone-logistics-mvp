@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {simulateBranch,BRANCH_DEFAULTS} from '../static/branch/model.mjs';
 import {nodeState} from '../static/branch/node_state.mjs';
 const p=simulateBranch(BRANCH_DEFAULTS),r=p.target;
-const c=nodeState(p,'C',r.arrivalC+1);assert.ok(c.present.some(f=>f.id===r.id&&f.state==='装卸作业'));
+const c=nodeState(p,'C',r.serviceStartC+.1);assert.ok(c.present.some(f=>f.id===r.id&&f.state==='装卸作业'));
 assert.ok(c.queues.every(q=>q.flights.every(f=>f.branch===q.leg.at(-1))));
 const ready=nodeState(p,'C',r.departC-.01);assert.ok(ready.present.some(f=>f.id===r.id&&f.state==='FIFO 等待'));
 assert.ok(!nodeState(p,'C',r.departC).present.some(f=>f.id===r.id));

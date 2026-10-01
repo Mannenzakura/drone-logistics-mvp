@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {chooseBranch,BRANCH_DEFAULTS} from '../static/branch/model.mjs';
+import {trialSeeds} from '../static/branch/repeated.mjs';
+import {pairedRouteStudy,comparePaired,recommendRoute,wilson,pairedMean} from '../static/branch/paired_routes.mjs';
+const plan=chooseBranch(BRANCH_DEFAULTS),a=pairedRouteStudy(plan),b=pairedRouteStudy(plan);assert.deepEqual(a,b);assert.equal(a.recommendation,'D');assert.equal(a.currentRoute,'E');assert.equal(a.paired.onlyD,8);assert.equal(a.paired.onlyE,0);assert.equal(a.validation.target.feasible,98);
+const d=a.candidates[0].result,e=a.candidates[1].result;assert.deepEqual(d.trials.map(t=>t.seed),e.trials.map(t=>t.seed));const used=new Set(d.trials.map(t=>t.seed));assert.ok(!used.has(plan.p.batchSeed));assert.ok(a.validation.trials.every(t=>!used.has(t.seed)&&t.seed!==plan.p.batchSeed));
+const overlap=pairedRouteStudy(plan,{runs:20,seed:24,validationSeed:24});const selectedSeeds=new Set(overlap.candidates[0].result.trials.map(t=>t.seed));assert.ok(overlap.validation.trials.every(t=>!selectedSeeds.has(t.seed)));
+assert.ok(Math.abs(wilson(100,100).high-1)<1e-12);assert.ok(wilson(100,100).low<1);assert.ok(wilson(0,100).high>0);assert.equal(pairedMean([0,0]).low,null);assert.ok(pairedMean([-1,0]).low<0);
+assert.equal(recommendRoute([{branch:'D',result:{target:{feasible:0}}},{branch:'E',result:{target:{feasible:0}}}]),null);
+const x={trials:[{seed:1,feasible:true,net:10,energy:2},{seed:2,feasible:true,net:100,energy:4}]},y={trials:[{seed:1,feasible:true,net:13,energy:3},{seed:2,feasible:false,net:null,energy:null}]};const delta=comparePaired(x,y);assert.equal(delta.net.n,1);assert.equal(delta.net.mean,3);assert.equal(delta.onlyD,1);assert.equal(delta.energy.mean,1);assert.throws(()=>comparePaired(x,{trials:[{seed:9}]}));
+const seeds=trialSeeds(24,3);assert.equal(trialSeeds(24,3,[seeds[0]])[0],seeds[1]);assert.throws(()=>trialSeeds(24,0));assert.throws(()=>pairedRouteStudy(plan,{validationSeed:-1}));
+const single=pairedRouteStudy(chooseBranch({...BRANCH_DEFAULTS,departuresCE:[0]}),{runs:10});assert.equal(single.candidates.find(c=>c.branch==='E').result,undefined);assert.equal(single.paired,null);
+console.log('Paired common streams, honest conditional differences, reliability ranking, Wilson extremes, disjoint holdout, reproducibility and infeasible alternative passed');

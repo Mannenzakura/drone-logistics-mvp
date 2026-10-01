@@ -1,0 +1,14 @@
+/* Retain the original local simulator palette; add small-screen safeguards. */
+:root{color-scheme:light}
+input[type=text]{font:inherit;color:#203b34;background:#fff;border:1px solid #cedbd2;border-radius:6px;padding:8px;width:100%;margin-top:6px}
+.cost-row{display:grid;grid-template-columns:minmax(140px,1fr) minmax(40px,1fr) 110px;gap:10px;align-items:center}
+.cost-row progress{width:100%;accent-color:#176a54}
+.table-scroll{overflow-x:auto;max-width:100%}
+#timingPanel,#regionPanel{margin-top:18px}
+#regionCanvas{height:300px!important}
+@media(max-width:760px){.cost-row{grid-template-columns:1fr 90px}.cost-row progress{display:none}}
+.summary strong{white-space:normal;overflow-wrap:anywhere}
+input[type=number],select{min-height:40px}
+table{border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1px solid #dce6df;white-space:nowrap}th{color:#557463;font-weight:500}
+.workspace>.panel{margin-bottom:18px}
+@media(max-width:760px){.badge{white-space:normal}.workspace{width:100%}.constraint-head{flex-wrap:wrap}.summary strong{font-size:18px}}

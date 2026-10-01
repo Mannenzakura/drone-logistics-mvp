@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>导师框架 v2.1 §11 · 结果页</title>
+<style>
+:root{--ink:#16241f;--dim:#5d7168;--line:#dce7e3;--brand:#16735e;--deep:#12674f;--amber:#c99345;--bg:#f6faf8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.65 -apple-system,"Segoe UI",system-ui,"PingFang SC","Microsoft YaHei",sans-serif}
+header{padding:22px 26px;background:#fff;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+h1{margin:0;font-size:19px}
+header p{margin:2px 0 0;color:var(--dim);font-size:12.5px}
+a.back{color:var(--brand);text-decoration:none;font-weight:600}
+main{max-width:1080px;margin:0 auto;padding:22px 18px 60px}
+section{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 18px}
+h2{margin:0 0 4px;font-size:16.5px;color:var(--deep)}
+h3{margin:18px 0 6px;font-size:14px}
+p.note{color:var(--dim);font-size:12.5px;margin:6px 0 12px}
+.warn{background:#fff8ec;border-color:#f0dcb8}
+.warn b{color:#8a5a2a}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{background:#f2f7f5;color:var(--dim);font-weight:600;font-size:12px}
+tbody tr:hover{background:#fafcfb}
+.kpi{display:flex;flex-wrap:wrap;gap:14px;margin:10px 0 4px}
+.kpi div{flex:1 1 190px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:#fbfdfc}
+.kpi span{display:block;color:var(--dim);font-size:12px}
+.kpi strong{font-size:19px;color:var(--deep)}
+.kpi small{display:block;color:var(--dim);font-size:11.5px}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:3px 0}
+code{background:#eef4f1;padding:1px 5px;border-radius:4px;font-size:12.5px}
+footer{color:var(--dim);font-size:12px;text-align:center;padding:8px 0 0}
+</style></head><body>
+<header>
+<div><h1>导师框架 v2.1 §11 · 结果页</h1>
+<p>上层稳态 LP + 下层夜间卡车 · 合成网络算例（19 节点 / 132 航段）</p></div>
+<a class="back" href="../">← 回到索降与编队模拟器</a>
+</header>
+<main>
+
+<section class="warn"><h2>先读这一段：哪些数可以引用</h2>
+<p class="note"><b>结构／机制结论可引用；绝对吞吐一律不可引用。</b>
+本页所有绝对数字都跑在<strong>合成网络</strong>上（原文的 61 节点经纬度坐标明确不予公开），
+而且起降场机位数 <code>N_i^TO/N_i^LA</code> 原文未给、由我们假设。两件事都会大幅改变绝对值：
+吞吐随起降场机位假设在 4.4 万–13.0 万 kg/h 之间变（3.0 倍）。
+拿到导师的真实算例后需整体重跑。</p></section>
+
+<section><h2>§11-3 五档情景：现在五档全部可算</h2>
+<p class="note">第五档「编队+链+卡车」的上层与「仅容量编队」相同，差别在下层夜间卡车子问题
+（框架 §7）。卡车成本 <code>c_T</code> 未给数值，因此报的是<strong>参数无关</strong>的总卡车-公里，
+<code>C^night = (c_T/Q) × truck_km</code>。</p>
+<div class="tw"><table class=""><thead><tr><th>情景</th><th>载重 kg/h</th><th>相对无编队</th><th>夜间需调运架数</th><th>卡车-公里/夜</th></tr></thead><tbody><tr><td>solo_only</td><td>78812.74</td><td>0.0%</td><td>120.0</td><td>2435.6</td></tr><tr><td>capacity_only</td><td>81379.29</td><td>3.3%</td><td>2.2</td><td>43.8</td></tr><tr><td>formation_chains</td><td>81379.29</td><td>3.3%</td><td>2.2</td><td>43.8</td></tr><tr><td>formation_direct</td><td>81379.29</td><td>3.3%</td><td>2.2</td><td>43.8</td></tr></tbody></table></div>
+<div class="kpi">
+<div><span>编队把夜间调运量压低</span><strong>98.2%</strong><small>需要夜间回位的飞机数</small></div>
+<div><span>无编队 / 编队 卡车-公里</span><strong>2435.6 / 43.8</strong><small>每晚</small></div>
+<div><span>无编队需要夜间调运</span><strong>120.0 架</strong><small>编队只需 2.2 架</small></div>
+</div>
+<p class="note">这是<strong>载重目标完全看不到</strong>的一条收益：无编队的最大流解把飞机送得极不均衡，
+编队方案几乎自平衡。机制上，容量扩张让航线使用方式变均衡，日末净流出接近零。</p>
+</section>
+
+<section><h2>§11-1 / §2.2 交叉冲突消解：代价有多大</h2>
+<p class="note">按原文式(21) 与补充材料图 S1 的双步循环实现（动态容量用 <code>min</code> 更新，
+单调不增故必然收敛）。<b>原文自己的权威值是容量损失 1.56%%</b>（161 788.55 → 159 257.34 kg/h，
+6 轮收敛、交叉点稳定于 89）。下表是我们在合成网络上的值，<b>比原文大一个量级</b>，
+原因见后面的密度与权重诊断。</p>
+<h3>冲突消解代价（不含 / 含原文的 n_min=3 门限）</h3>
+<div class="tw"><table class=""><thead><tr><th>情景</th><th>n_min</th><th>无冲突 kg/h</th><th>消解后 kg/h</th><th>代价</th><th>降容航段</th><th>轮数</th></tr></thead><tbody><tr><td>solo_only</td><td>0.0</td><td>78812.74</td><td>62871.22</td><td><b>-20.23%</b></td><td>43</td><td>9</td></tr><tr><td>capacity_only</td><td>0.0</td><td>81379.29</td><td>76027.20</td><td><b>-6.58%</b></td><td>18</td><td>2</td></tr><tr><td>formation_chains</td><td>0.0</td><td>81379.29</td><td>74786.28</td><td><b>-8.10%</b></td><td>22</td><td>4</td></tr><tr><td>formation_direct</td><td>0.0</td><td>81379.29</td><td>74786.28</td><td><b>-8.10%</b></td><td>22</td><td>4</td></tr><tr><td>solo_only</td><td>3.0</td><td>78812.74</td><td>63713.61</td><td><b>-19.16%</b></td><td>43</td><td>12</td></tr><tr><td>capacity_only</td><td>3.0</td><td>81379.29</td><td>76177.16</td><td><b>-6.39%</b></td><td>16</td><td>2</td></tr><tr><td>formation_chains</td><td>3.0</td><td>81379.29</td><td>75078.70</td><td><b>-7.74%</b></td><td>20</td><td>4</td></tr><tr><td>formation_direct</td><td>3.0</td><td>81379.29</td><td>75078.70</td><td><b>-7.74%</b></td><td>20</td><td>4</td></tr></tbody></table></div>
+<h3>密度扫描：代价随网络密度单调变负</h3>
+<div class="tw"><table class=""><thead><tr><th>k_nearest</th><th>航段</th><th>航段/节点</th><th>严格交叉对</th><th>交叉对/段</th><th>代价</th></tr></thead><tbody><tr><td>2</td><td>31</td><td>1.6</td><td>0</td><td>0.00</td><td><b>0.00%</b></td></tr><tr><td>3</td><td>44</td><td>2.3</td><td>6</td><td>0.14</td><td><b>-0.04%</b></td></tr><tr><td>4</td><td>57</td><td>3.0</td><td>29</td><td>0.51</td><td><b>-7.58%</b></td></tr><tr><td>5</td><td>69</td><td>3.6</td><td>79</td><td>1.14</td><td><b>-13.54%</b></td></tr><tr><td>6</td><td>80</td><td>4.2</td><td>147</td><td>1.84</td><td><b>-13.39%</b></td></tr><tr><td>8</td><td>102</td><td>5.4</td><td>388</td><td>3.80</td><td><b>-19.71%</b></td></tr><tr><td>全部</td><td>132</td><td>6.9</td><td>1024</td><td>7.76</td><td><b>-20.23%</b></td></tr></tbody></table></div>
+<p class="note">密度是一阶因素，但<b>不足以解释与原文的差距</b>：k=5 时只有 79 个交叉对就已 −13.5%，
+而原文 89 个交叉点只损 1.56%。</p>
+<h3>为什么我们这边降容这么狠：权重诊断</h3>
+<div class="tw"><table class=""><thead><tr><th>k_nearest</th><th>活跃对</th><th>w1 均值</th><th>w1 中位</th><th>悬殊对占比</th><th>r 均值</th><th>平均降容因子</th></tr></thead><tbody><tr><td>4</td><td>10</td><td>0.835</td><td>0.798</td><td>0.0%</td><td>0.281</td><td>0.172</td></tr><tr><td>5</td><td>19</td><td>0.747</td><td>0.798</td><td>0.0%</td><td>0.286</td><td>0.177</td></tr><tr><td>全部</td><td>24</td><td>0.646</td><td>0.798</td><td>0.0%</td><td>0.280</td><td>0.219</td></tr></tbody></table></div>
+<p class="note"><code>w1 = min(F_other/F_self, 1)</code> 是「冲突时段占比」。我们的冲突对流量高度均衡
+（w1 中位 ≈0.8、<b>悬殊对占比 0%%</b>），再叠加偏陡的交叉夹角（平均 r≈0.28，理论上限 0.5），
+于是每次冲突几乎都是「全额冲突」，平均降容因子只有 ≈0.2。
+原文只损 1.56%%，剩下的唯一自由度是它那边 w1 很小（流量集中在少数走廊）——
+<b>没有 61 节点坐标就无法验证</b>。</p>
+</section>
+
+<section><h2>§11-4 成本灵敏度：这个灵敏度会退化</h2>
+<p class="note">原文目标只有「载重最大」，没有任何成本项。把 <code>c^net</code>（滞空均摊）与
+<code>C^own</code>（产权）按「每等效 kg 收益」归一后加进目标：
+<code>max Σpayload − c_net·滞空小时 − C_own·架次</code>。</p>
+<div class="tw"><table class=""><thead><tr><th>c_net</th><th>C_own</th><th>载重 kg/h</th><th>净收益</th><th>载重溢价</th><th>净溢价</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>81379.3</td><td>81379.3</td><td>+3.26%</td><td><b>+3.26%</b></td></tr><tr><td>0</td><td>10</td><td>78745.1</td><td>60745.1</td><td>+3.37%</td><td><b>+4.41%</b></td></tr><tr><td>0</td><td>50</td><td><b>0（完全不飞）</b></td><td>0</td><td>—</td><td>—</td></tr><tr><td>0</td><td>200</td><td><b>0（完全不飞）</b></td><td>0</td><td>—</td><td>—</td></tr><tr><td>1</td><td>0</td><td>81379.3</td><td>80843.6</td><td>+3.26%</td><td><b>+3.32%</b></td></tr><tr><td>1</td><td>10</td><td>78745.1</td><td>60275.0</td><td>+3.37%</td><td><b>+4.50%</b></td></tr><tr><td>1</td><td>50</td><td><b>0（完全不飞）</b></td><td>0</td><td>—</td><td>—</td></tr><tr><td>1</td><td>200</td><td><b>0（完全不飞）</b></td><td>0</td><td>—</td><td>—</td></tr><tr><td>5</td><td>0</td><td>81379.3</td><td>78700.7</td><td>+3.26%</td><td><b>+3.58%</b></td></tr><tr><td>5</td><td>10</td><td>78745.1</td><td>58394.8</td><td>+3.37%</td><td><b>+4.88%</b></td></tr><tr><td>5</td><td>50</td><td><b>0（完全不飞）</b></td><td>0</td><td>—</td><td>—</td></tr><tr><td>5</td><td>200</td><td><b>0（完全不飞）</b></td><td>0</td><td>—</td><td>—</td></tr><tr><td>20</td><td>0</td><td>81348.8</td><td>70688.7</td><td>+3.35%</td><td><b>+4.59%</b></td></tr><tr><td>20</td><td>10</td><td>76582.6</td><td>52032.7</td><td>+3.29%</td><td><b>+5.49%</b></td></tr><tr><td>20</td><td>50</td><td><b>0（完全不飞）</b></td><td>0</td><td>—</td><td>—</td></tr><tr><td>20</td><td>200</td><td><b>0（完全不飞）</b></td><td>0</td><td>—</td><td>—</td></tr></tbody></table></div>
+<h3>结论</h3>
+<ul>
+<li><b>成本越高，编队的相对优势越大</b>：编队比无编队少约 30 小时滞空，
+所以净溢价从 +3.26%% 涨到 +5.49%%。</li>
+<li><b>但 C_own ≥ 50（等效 kg/架次）时最优解直接变成「完全不飞」</b>：
+每架次平均载重只有 ≈38.8 kg，成本一超过它，「什么都不做」就是最优。
+这是「纯最大流 + 成本项」的固有退化 —— <b>要加成本项就必须同时加需求侧</b>，
+否则灵敏度只是飞/不飞的二值开关。</li>
+</ul></section>
+
+<section><h2>§11-1 延程边判据：链不是延程机制</h2>
+<p class="note">链级判据是 <code>Σγ_s·d_s ≤ R_max</code>，即链是<strong>同一架飞机飞完整条路径</strong>，
+受与直达相同的能量预算约束。因此链能到达的路径长度上界是 <code>R_max/γ</code>：</p>
+<div class="tw"><table class=""><thead><tr><th>机型</th><th>R_max / km</th><th>R_max/γ 倍数</th><th>相对提升</th></tr></thead><tbody><tr><td>K1</td><td>60</td><td>63.830</td><td>+6282.98%</td></tr><tr><td>K2</td><td>20</td><td>21.277</td><td>+2027.66%</td></tr><tr><td>K3</td><td>110</td><td>117.021</td><td>+11602.13%</td></tr><tr><td>K4</td><td>20</td><td>21.277</td><td>+2027.66%</td></tr></tbody></table></div>
+<p class="note">数值验证：32 个超出 R_max 的 OD 对里，<strong>有链候选的是 0 个</strong>
+（绕行率上限放宽到 5.0、中间点放到 3 也仍是 0）。⇒ 框架「对 d^od &gt; R^form_k 的 OD，
+链是唯一可达方式」不成立；链应定位为「在已可达 OD 上节能与省起降资源的手段」，
+要真延程需要<b>链上换机</b>。</p>
+<p class="note">另外：在原文那种无需求最大流里，<strong>链结构性地无利可图</strong>
+（最优解链流量恰为 0；强行要求链流量 ≥ X 则目标单调下降）。原因是航段位记账——
+k 段链占 k 个航段位却只运一份货。</p></section>
+
+<section><h2>怎么验证的</h2>
+<ul>
+<li>Python <b>73 项测试</b>全过（<code>unittest discover</code>）。</li>
+<li>Python↔JS <b>双实现逐系数对偶核对</b>：LP 构造 80 组、式(21)/图 S1 4368 个标量、
+  §7 卡车子问题 2622 个标量，<b>全部 0 失配</b>。</li>
+<li>第 7 行「卡车子问题」有两种等价写法（按类别解耦 vs 联合 LP），结果完全相同。</li>
+</ul>
+<p class="note">本页由 <code>_gen_section11.py</code> 从上述已测试的代码直接生成，数字不手抄。</p>
+</section>
+
+<footer>低空物流无人机编队 · 导师框架 v2.1 §11 · 内容指纹 见 STATUS.md</footer>
+</main></body></html>

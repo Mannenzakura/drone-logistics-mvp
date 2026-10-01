@@ -1,8 +1,9 @@
-import {boardFifo} from './network/engine.mjs?v=20261001-flow6';
-import {stationTrips,validateBatchCapacity} from './batch_capacity.mjs?v=20261001-flow6';
+import {sharedCService} from './shared_service.mjs?v=20261001-paired9';
+import {boardFifo} from './network/engine.mjs?v=20261001-paired9';
+import {stationTrips,validateBatchCapacity} from './batch_capacity.mjs?v=20261001-paired9';
 
 export const FOUR_DEFAULTS={
-  capacityMode:0,waitWarning:15,localWarmup:4,localRateC:1.4,localRateD:1.4,localRateE:1.4,batchSeed:20260930,batchMax:10,batchReserve:0,localProbabilityC:0.8,localProbabilityD:0.8,localProbabilityE:0.8,
+  serviceEnabledC:0,serviceServersC:1,capacityMode:0,waitWarning:15,localWarmup:4,localRateC:1.4,localRateD:1.4,localRateE:1.4,batchSeed:20260930,batchMax:10,batchReserve:0,localProbabilityC:0.8,localProbabilityD:0.8,localProbabilityE:0.8,
   batchSizeC:[],batchLocalC:[],batchReservedC:[],batchSizeD:[],batchLocalD:[],batchReservedD:[],batchSizeE:[],batchLocalE:[],batchReservedE:[],
   stationCount:4,destinations:[],de:12.5,eb:12.5,departuresE:[44,48,52,56,60,64,68,72,76],seatsE:2,serviceE:0,
   arrivalsC:[17,18,19,22,23,24],backgroundServiceC:[0,0,0,0,0,0],backgroundServiceD:[0,0,0,0,0,0],target:2,
@@ -47,6 +48,7 @@ export function validateFour(input){
   for(const [key,val] of Object.entries(p))if(typeof val==='number')finiteNonnegative(val,key);
   for(const key of ['seatsC','seatsD','formationSize','role','target','sharedC','sharedD','permitC','permitD','allowExtrapolation','enforceReferencePayload','winchEnabled','winchTiming'])if(!Number.isInteger(p[key]))throw new Error(`${key} 须为整数`);
   if(p.target>=p.arrivalsC.length)throw new Error('目标飞机编号超过飞机数量');
+  if(![0,1].includes(p.serviceEnabledC)||!Number.isInteger(p.serviceServersC)||p.serviceServersC<1||p.serviceServersC>20)throw new Error('共享设备开关须为0或1，设备数须为1–20整数');
   validateBatchCapacity(p);
   if(p.formationSize<1||p.formationSize>20||p.role>3||p.eta>1||p.chi>1)throw new Error('编队参数超出允许范围');
   if(![0,1].includes(p.sharedC)||![0,1].includes(p.sharedD)||![0,1].includes(p.permitC)||![0,1].includes(p.permitD))throw new Error('空域开关须为 0 或 1');
@@ -94,6 +96,8 @@ export function scheduleFour(p,workC,workD,options={}){
     workC:(id===p.target?workC:p.backgroundServiceC[id])+(options.extraC?.[id]??0),
     workD:(id===p.target?workD:p.backgroundServiceD[id])+(options.extraD?.[id]??0),workE:p.serviceE??0,
     terminalArrival:null,completionTime:null}));
+  const service=p.serviceEnabledC?sharedCService(p,rows):null;
+  for(const r of rows){const slot=service?.get(p.globalIdsC?.[r.id]??r.id);r.serviceStartC=slot?.start??r.arrivalC;r.serviceEndC=slot?.end??r.arrivalC+r.workC;r.serviceQueueC=slot?.queue??0;r.serviceServerC=slot?.server??null;}
   const events=[],batches=[];
   for(const station of stations){
     const outgoing=rows.filter(r=>r.destination!==station);
@@ -101,7 +105,7 @@ export function scheduleFour(p,workC,workD,options={}){
       r.terminalArrival=r['arrival'+station];r.completionTime=r.terminalArrival+r['work'+station];
       events.push({time:r.completionTime,station,type:'complete',flight:r.id,text:`F${r.id+1} 在 ${station} 完成交付，退出后续编队队列`});
     }
-    const flights=outgoing.map(r=>({id:r.id,arrival:r['arrival'+station],ready:r['arrival'+station]===null?null:r['arrival'+station]+r['work'+station]+(r.id===p.target?p.joinBuffer:0),departure:null}));
+    const flights=outgoing.map(r=>({id:r.id,arrival:r['arrival'+station],ready:r['arrival'+station]===null?null:(station==='C'?r.serviceEndC:r['arrival'+station]+r['work'+station])+(r.id===p.target?p.joinBuffer:0),departure:null}));
     const trips=stationTrips(p,station,options['trips'+station]).map((trip,index)=>({...trip,cancelled:options['trips'+station]?.[index]?.cancelled??false}));
     const result=options.solo?{events:[],batches:[],flights:flights.filter(r=>r.arrival!==null).map(r=>({...r,departure:r.ready-(r.id===p.target?p.joinBuffer:0)}))}:boardFifo(flights,trips,p['seats'+station],station);
     events.push(...result.events);
