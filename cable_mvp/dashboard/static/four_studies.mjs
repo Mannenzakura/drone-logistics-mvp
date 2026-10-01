@@ -1,4 +1,4 @@
-import {evaluateFour,scheduleFour,routeDistance,cruiseFour} from './four_model.mjs?v=20260930-random2';
+import {evaluateFour,scheduleFour,routeDistance,cruiseFour} from './four_model.mjs?v=20261001-flow6';
 const safe=(p,d,c,l)=>{try{return evaluateFour(p,d,c,l)}catch{return null}};
 const summary=r=>r?{net:r.net,energy:r.energy,dC:r.dC,lC:r.lC,lD:r.lD,departC:r.target.departC,departD:r.target.departD,arrivalD:r.target.arrivalD,waitC:r.target.waitC,waitD:r.target.waitD}:null;
 export function fourStudies(plan,options={}){

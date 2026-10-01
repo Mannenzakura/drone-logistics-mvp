@@ -1,8 +1,8 @@
-import {boardFifo} from './network/engine.mjs?v=20260930-random2';
-import {stationTrips,validateBatchCapacity} from './batch_capacity.mjs?v=20260930-random2';
+import {boardFifo} from './network/engine.mjs?v=20261001-flow6';
+import {stationTrips,validateBatchCapacity} from './batch_capacity.mjs?v=20261001-flow6';
 
 export const FOUR_DEFAULTS={
-  capacityMode:0,waitWarning:15,batchSeed:20260930,batchMax:10,batchReserve:0,localProbabilityC:0.8,localProbabilityD:0.8,localProbabilityE:0.8,
+  capacityMode:0,waitWarning:15,localWarmup:4,localRateC:1.4,localRateD:1.4,localRateE:1.4,batchSeed:20260930,batchMax:10,batchReserve:0,localProbabilityC:0.8,localProbabilityD:0.8,localProbabilityE:0.8,
   batchSizeC:[],batchLocalC:[],batchReservedC:[],batchSizeD:[],batchLocalD:[],batchReservedD:[],batchSizeE:[],batchLocalE:[],batchReservedE:[],
   stationCount:4,destinations:[],de:12.5,eb:12.5,departuresE:[44,48,52,56,60,64,68,72,76],seatsE:2,serviceE:0,
   arrivalsC:[17,18,19,22,23,24],backgroundServiceC:[0,0,0,0,0,0],backgroundServiceD:[0,0,0,0,0,0],target:2,
@@ -102,7 +102,7 @@ export function scheduleFour(p,workC,workD,options={}){
       events.push({time:r.completionTime,station,type:'complete',flight:r.id,text:`F${r.id+1} 在 ${station} 完成交付，退出后续编队队列`});
     }
     const flights=outgoing.map(r=>({id:r.id,arrival:r['arrival'+station],ready:r['arrival'+station]===null?null:r['arrival'+station]+r['work'+station]+(r.id===p.target?p.joinBuffer:0),departure:null}));
-    const trips=stationTrips(p,station).map((trip,index)=>({...trip,cancelled:options['trips'+station]?.[index]?.cancelled??false}));
+    const trips=stationTrips(p,station,options['trips'+station]).map((trip,index)=>({...trip,cancelled:options['trips'+station]?.[index]?.cancelled??false}));
     const result=options.solo?{events:[],batches:[],flights:flights.filter(r=>r.arrival!==null).map(r=>({...r,departure:r.ready-(r.id===p.target?p.joinBuffer:0)}))}:boardFifo(flights,trips,p['seats'+station],station);
     events.push(...result.events);
     batches.push(...result.batches);

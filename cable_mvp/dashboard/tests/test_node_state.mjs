@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {simulateBranch,BRANCH_DEFAULTS} from '../static/branch/model.mjs';
+import {nodeState} from '../static/branch/node_state.mjs';
+const p=simulateBranch(BRANCH_DEFAULTS),r=p.target;
+const c=nodeState(p,'C',r.arrivalC+1);assert.ok(c.present.some(f=>f.id===r.id&&f.state==='装卸作业'));
+assert.ok(c.queues.every(q=>q.flights.every(f=>f.branch===q.leg.at(-1))));
+const ready=nodeState(p,'C',r.departC-.01);assert.ok(ready.present.some(f=>f.id===r.id&&f.state==='FIFO 等待'));
+assert.ok(!nodeState(p,'C',r.departC).present.some(f=>f.id===r.id));
+assert.ok(nodeState(p,'D',r.arrivalHub+.1).present.some(f=>f.id===r.id));
+assert.ok(nodeState(p,'E',r.arrivalHub+.1).present.every(f=>f.branch==='E'));
+assert.equal(nodeState(p,'B',p.horizon).completed.length,p.rows.filter(f=>f.destination==='B'&&f.arrivalB!==null).length);
+assert.equal(nodeState(p,'A',p.horizon).completed.length,p.rows.length);
+assert.throws(()=>nodeState(p,'X',0));
+console.log('Node occupancy, handling/FIFO boundary, branch isolation, arrivals and completed accounting passed');

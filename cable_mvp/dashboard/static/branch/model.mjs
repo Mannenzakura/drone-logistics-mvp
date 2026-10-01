@@ -1,5 +1,5 @@
-import {FOUR_DEFAULTS,validateFour,optimizeFour,scheduleFour} from '../four_model.mjs?v=20260930-random2';
-export const BRANCH_DEFAULTS={...FOUR_DEFAULTS,capacityMode:2,battery:5,branches:['D','E','D','E','D','E'],destinations:['D','E','B','B','B','B'],ce:30,eb:20,departuresCE:[22,26,30,34,38,42,46],departuresEB:[40,44,48,52,56,60,64,68],localProbabilityCE:.8,localProbabilityEB:.8};
+import {FOUR_DEFAULTS,validateFour,optimizeFour,scheduleFour} from '../four_model.mjs?v=20261001-flow6';
+export const BRANCH_DEFAULTS={...FOUR_DEFAULTS,capacityMode:3,battery:5,localRateCE:1.4,localRateEB:1.4,branches:['D','E','D','E','D','E'],destinations:['D','E','B','B','B','B'],ce:30,eb:20,departuresCE:[22,26,30,34,38,42,46],departuresEB:[40,44,48,52,56,60,64,68],localProbabilityCE:.8,localProbabilityEB:.8};
 export function branchParameters(input){
  const p={...BRANCH_DEFAULTS,...input,stationCount:4};
  const n=p.arrivalsC?.length;
@@ -7,7 +7,7 @@ export function branchParameters(input){
  if(!Array.isArray(p.branches)||p.branches.length!==n||p.branches.some(x=>!['D','E'].includes(x)))throw new Error('每架飞机的分支须为 D 或 E，数量与到达表一致');
  if(!Array.isArray(p.destinations)||p.destinations.length!==n||p.destinations.some((x,i)=>x!=='B'&&x!==p.branches[i]))throw new Error('终点须为 B 或本机经过的 D/E');
  if(!Number.isInteger(p.target)||p.target<0||p.target>=n||p.destinations[p.target]!=='B')throw new Error('目标机须为去 B 的飞机');
- if(![0,2].includes(p.capacityMode))throw new Error('分支原型支持 0 固定、2 随机模式');
+ if(![0,2,3].includes(p.capacityMode))throw new Error('分支原型支持 0 固定、2 独立抽样、3 连续到达模式');
  return p;
 }
 function subset(p,branch){
@@ -15,6 +15,7 @@ function subset(p,branch){
  const q={...p,target:Math.max(0,ids.indexOf(p.target)),stationCount:4,cd:e?p.ce:p.cd,db:e?p.eb:p.db,
  arrivalsC:ids.map(i=>p.arrivalsC[i]),backgroundServiceC:ids.map(i=>p.backgroundServiceC[i]),backgroundServiceD:ids.map(i=>p.backgroundServiceD[i]),
  destinations:ids.map(i=>p.destinations[i]===branch?'D':'B'),departuresC:e?p.departuresCE:p.departuresC,departuresD:e?p.departuresEB:p.departuresD,
+ localRateC:e?p.localRateCE:p.localRateC,localRateD:e?p.localRateEB:p.localRateD,
  localProbabilityC:e?p.localProbabilityCE:p.localProbabilityC,localProbabilityD:e?p.localProbabilityEB:p.localProbabilityD,
  batchSeed:(p.batchSeed^(e?0x5e123:0x4d123))>>>0};
  return {ids,q};

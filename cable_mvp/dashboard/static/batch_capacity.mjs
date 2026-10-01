@@ -1,3 +1,4 @@
+import {generateLocalArrivals,serveLocalQueue} from './local_queue.mjs?v=20261001-flow6';
 // Local roster includes the leader. Reserved slots are held empty and provide no wake benefit.
 export function activeStations(p){return p.stationCount===5?['C','D','E']:['C','D']}
 export function randomTrips(p,station){
@@ -10,7 +11,12 @@ export function randomTrips(p,station){
     return {time,cancelled:false,plannedSize,local,reserved,seats:plannedSize-local-reserved};
   });
 }
-export function stationTrips(p,station){
+export function stationTrips(p,station,overrides=[]){
+  if(p.capacityMode===3){
+    const times=p['departures'+station],start=Math.max(0,times[0]-p.localWarmup),seed=(p.batchSeed^({C:1103,D:2207,E:3301}[station]))>>>0;
+    const arrivals=generateLocalArrivals(seed,p['localRate'+station],start,times.at(-1));
+    return serveLocalQueue(arrivals,times.map((time,i)=>({time,cancelled:overrides[i]?.cancelled??false})),p.batchMax,p.batchReserve);
+  }
   if(p.capacityMode===2)return randomTrips(p,station);
   return p['departures'+station].map((time,index)=>{
     if(p.capacityMode!==1)return {time,cancelled:false,seats:p['seats'+station],plannedSize:p.formationSize,local:null,reserved:0};
@@ -19,11 +25,12 @@ export function stationTrips(p,station){
   });
 }
 export function validateBatchCapacity(p){
-  if(![0,1,2].includes(p.capacityMode))throw new Error('位次模式须为 0 固定、1 手工、2 随机');
-  if(p.capacityMode===2){
+  if(![0,1,2,3].includes(p.capacityMode))throw new Error('位次模式须为 0 固定、1 手工、2 独立抽样、3 连续到达');
+  if(p.capacityMode===2||p.capacityMode===3){
     if(!Number.isInteger(p.batchSeed)||p.batchSeed<0||p.batchSeed>4294967295)throw new Error('随机种子须为 0–4294967295 整数');
     if(!Number.isInteger(p.batchMax)||p.batchMax<1||p.batchMax>20||!Number.isInteger(p.batchReserve)||p.batchReserve<0||p.batchReserve>=p.batchMax)throw new Error('随机总规模须为 1–20，预留空位须小于总规模');
-    for(const s of activeStations(p))if(!Number.isFinite(p['localProbability'+s])||p['localProbability'+s]<0||p['localProbability'+s]>1)throw new Error(`${s} 本地需求概率须在 0–1 之间`);
+    if(p.capacityMode===3){if(!Number.isFinite(p.localWarmup)||p.localWarmup<0||p.localWarmup>1440)throw new Error('预热时长须在 0–1440 min');for(const s of activeStations(p)){if(!Number.isFinite(p['localRate'+s])||p['localRate'+s]<0||p['localRate'+s]>20||p['departures'+s].at(-1)>1440)throw new Error('本地到达率须在 0–20 架/min，班次时刻不超过1440 min')}}
+    for(const s of activeStations(p))if(p.capacityMode===2&&(!Number.isFinite(p['localProbability'+s])||p['localProbability'+s]<0||p['localProbability'+s]>1))throw new Error(`${s} 本地需求概率须在 0–1 之间`);
   }
   for(const station of activeStations(p)){
     if(!Number.isInteger(p['seats'+station])||p['seats'+station]<0||p['seats'+station]>20)throw new Error(`${station} 固定空位须为 0–20 的整数`);

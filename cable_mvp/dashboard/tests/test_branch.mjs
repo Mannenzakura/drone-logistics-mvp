@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {BRANCH_DEFAULTS,simulateBranch,queueCount} from '../static/branch/model.mjs';
-const p={...BRANCH_DEFAULTS,battery:8};const a=simulateBranch(p);
+const p={...BRANCH_DEFAULTS,capacityMode:2,battery:8};const a=simulateBranch(p);
 assert.equal(a.rows.length,6);assert.equal(a.target.branch,'D');
 for(const batch of a.batches){const branch=batch.station.includes('E')?'E':'D';assert.ok(batch.flights.every(id=>p.branches[id]===branch));assert.ok(batch.boarded<=batch.capacity)}
 const blockedD=simulateBranch({...p,localProbabilityC:1,target:3});
@@ -15,4 +15,5 @@ assert.throws(()=>simulateBranch({...p,branches:['E','E','D','E','D','E']}));
 assert.throws(()=>simulateBranch({...p,ce:-1}));
 assert.deepEqual(a.batches,simulateBranch(p).batches);
 console.log('Branch separation, zero-slot isolation, terminal exits, E target economics, seeded replay and invalid routes passed');
+
 

@@ -38,7 +38,7 @@ def git(repo, *args):
 def excluded(path):
     p = PurePosixPath(path)
     return (any(x in EXCLUDE_DIRS for x in p.parts) or p.name in EXCLUDE_FILES
-            or p.name.endswith(('.log', '.pyc', '.zip')) or p.name == 'latest-version-proof.jpg' or p.name == '.env' or p.name.startswith('.env.'))
+            or p.name.endswith(('.log', '.pyc', '.zip')) or p.name.endswith('-proof.jpg') or p.name == '.env' or p.name.startswith('.env.'))
 
 
 def managed(path):
