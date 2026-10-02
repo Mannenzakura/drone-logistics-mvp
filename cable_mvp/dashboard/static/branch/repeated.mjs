@@ -1,4 +1,4 @@
-import {simulateBranch} from './model.mjs?v=20261002-network19';
+import {simulateBranch} from './model.mjs?v=20261002-network20';
 export const quantile=(values,p=.95)=>values.length?[...values].sort((a,b)=>a-b)[Math.max(0,Math.ceil(p*values.length)-1)]:null;
 const mean=v=>v.length?v.reduce((a,b)=>a+b,0)/v.length:null;
 export function proportionCI(v){const avg=mean(v);if(v.length<2)return {mean:avg,low:null,high:null,runs:v.length};const variance=v.reduce((s,x)=>s+(x-avg)**2,0)/(v.length-1);if(variance===0)return {mean:avg,low:null,high:null,runs:v.length,noVariation:true};const delta=1.96*Math.sqrt(variance/v.length);return {mean:avg,low:Math.max(0,avg-delta),high:Math.min(1,avg+delta),runs:v.length};}

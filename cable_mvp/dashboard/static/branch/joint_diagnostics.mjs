@@ -1,6 +1,6 @@
-import {effectivePayload,winchTimes,evaluateFour,cruiseFour} from '../four_model.mjs?v=20261002-network19';
-import {flowSchedule} from './network_flow.mjs?v=20261002-network19';
-import {quantile} from './repeated.mjs?v=20261002-network19';
+import {effectivePayload,winchTimes,evaluateFour,cruiseFour} from '../four_model.mjs?v=20261002-network20';
+import {flowSchedule} from './network_flow.mjs?v=20261002-network20';
+import {quantile} from './repeated.mjs?v=20261002-network20';
 export function diagnoseJoint(p,c,deadline){
  const timing=winchTimes(p,c.dC,c.lC,c.lHub),limit=effectivePayload(p),mass=p.q+Math.max(c.dC,c.lC,c.lHub),schedule=flowSchedule(p,timing.workC,timing.workD),t=schedule.rows[p.target];let reason='成功',energy=null;
  if(mass>limit+1e-9||Math.max(c.dC,c.lC,c.lHub)>p.bay+1e-9)reason='载荷或仓容超限';

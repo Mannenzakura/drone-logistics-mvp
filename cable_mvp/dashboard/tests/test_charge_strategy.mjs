@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {chargingPlan} from '../static/branch/charge_planner.mjs';
+import {simulateFull} from '../static/branch/full_model.mjs';
+import {eventSchedule} from '../static/branch/event_network.mjs';
+import {networkLedger} from '../static/branch/network_economics.mjs';
+import {jointStudy,JOINT_DEFAULTS} from '../static/branch/joint.mjs';
+const p={...simulateFull({}).p,ac:30,fullCD:10,fullCE:10,fullDB:10,fullEB:10,speed:60,battery:1,energyReserve:0,serviceEnabledC:0,sharedC:0,sharedD:0,target:-1,departuresC:[33,40],departuresCE:[],departuresD:[46,61],departuresEB:[],batchMax:5,batchReserve:0,joinBuffer:0,groundStandby:1,energyPolicy:'charge',chargeSlots:1};
+const job={id:0,origin:'A',branch:'D',destination:'B',created:0,weight:1,dropC:0,loadC:0,loadHub:0,workC:0,workHub:0,cargoType:'普通',feeFactor:1,dispatchDeadline:90};
+const o={...JOINT_DEFAULTS,chargeVisitCost:0},input={...p,fullJobs:[job]},full=eventSchedule(input,0,0,o),next=eventSchedule({...input,chargeStrategy:'next'},0,0,o),remaining=eventSchedule({...input,chargeStrategy:'remaining'},0,0,o);
+assert.equal(full.rows[0].departC,40);assert.equal(next.rows[0].departC,33);assert.equal(next.rows[0].arrivalB,56);assert.equal(full.rows[0].arrivalB,71);assert.equal(remaining.rows[0].arrivalB,71);
+const a=networkLedger(input,full,o),b=networkLedger(input,next,o),c=networkLedger(input,remaining,o);assert.equal(a.completed,1);assert.equal(b.completed,1);assert.equal(c.completed,1);assert.ok(b.net>a.net);assert.ok(c.totals.gridEnergy<a.totals.gridEnergy);
+assert.ok(next.rows[0].chargeHistory[0].storeEnergy<full.rows[0].chargeHistory[0].storeEnergy);assert.equal(remaining.rows[0].chargeHistory.length,1);assert.equal(next.rows[0].chargeHistory.length,2);
+for(const s of [full,next,remaining])for(const r of s.rows){for(let t=0;t<90;t+=.025){const frac=(t,a,b)=>b>a?Math.max(0,Math.min(1,(t-a)/(b-a))):Number(t>=a);const spent=r.energySegments.reduce((a,x)=>a+x.energy*frac(t,x.start,x.end),0),charged=r.chargeHistory.reduce((a,x)=>a+(x.storeEnergy??0)*frac(Math.min(t,x.ended??t),x.start,x.finish),0);assert.ok(spent-charged>=-1e-8&&spent-charged<=p.battery+1e-8)}}
+// Interrupt an engine-produced charging session midway and verify prorated grid billing.
+const interrupted=structuredClone(next),ir=interrupted.rows[0],ic=ir.chargeHistory[0],cutoff=(ic.start+ic.finish)/2;ir.terminatedAt=cutoff;ir.terminationReason='测试中断';ir.landings=1;ir.chargeHistory=[{...ic,ended:cutoff}];const cut=networkLedger(input,interrupted,o);assert.equal(cut.completed,0);assert.equal(cut.totals.revenue,0);assert.ok(Math.abs(cut.totals.gridEnergy-ic.gridEnergy/2)<1e-8);assert.equal(cut.tasks[0].depleted,false);
+const r={...job,station:'C',workD:0},deficit=p.ac*(p.k0+p.kLoad*job.weight),proposal=chargingPlan({...p,chargeStrategy:'next'},r,o,30,deficit,true);assert.equal(proposal.departure,33);assert.ok(proposal.finish<=33);assert.ok(proposal.forecastSOC>=proposal.flightEnergy+proposal.margin);
+assert.equal(chargingPlan({...p,chargeStrategy:'remaining',departuresD:[42]},r,o,30,deficit,true),null);assert.throws(()=>chargingPlan({...p,chargeStrategy:'unknown'},r,o,30,deficit));
+const blocked=eventSchedule({...input,fullJobs:[job,{...job,id:1}],chargeStrategy:'next',departuresC:[33]},0,0,o);assert.ok(blocked.rows[1].terminationReason==='充电后无可衔接班次');assert.equal(blocked.rows[1].departC,null);
+const study=jointStudy(simulateFull({}),{runs:20,reliability:.5}),charge=study.connections.charging;assert.equal(charge.results.length,7);assert.equal(charge.strategies.length,3);assert.equal(new Set([...study.seeds,...study.validationSeeds,...study.improvementSeeds,...study.connections.freshSeeds,...charge.seeds,...charge.strategySeeds]).size,120);
+for(const x of charge.strategies){assert.equal(x.exploration.length,3);assert.equal(x.alternatives.length,3);for(const a of x.alternatives)assert.deepEqual(a.trials.map(t=>t.seed),charge.strategySeeds);if(x.review)assert.ok(Math.abs(x.review.gain.mean-x.review.result.meanNet+x.review.reference.meanNet)<1e-8)}
+console.log('PASS partial charging catches earlier formation, remaining-route forecast, timetable limits, queue-time replanning, SOC conservation, electricity and sixth independent policy review');

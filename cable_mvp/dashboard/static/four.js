@@ -1,6 +1,6 @@
-import {FOUR_DEFAULTS,optimizeFour,effectivePayload,routeDistance,flightDestinations} from './four_model.mjs?v=20261002-network19';
-import {setupFourStudies,runFourStudies} from './four_studies_ui.mjs?v=20261002-network19';
-import {fillBatchEditor,readBatchEditor,previewBatchEditor,variableBatchExample,renderBatchResults,updateBatchLive} from './batch_capacity_ui.mjs?v=20261002-network19';
+import {FOUR_DEFAULTS,optimizeFour,effectivePayload,routeDistance,flightDestinations} from './four_model.mjs?v=20261002-network20';
+import {setupFourStudies,runFourStudies} from './four_studies_ui.mjs?v=20261002-network20';
+import {fillBatchEditor,readBatchEditor,previewBatchEditor,variableBatchExample,renderBatchResults,updateBatchLive} from './batch_capacity_ui.mjs?v=20261002-network20';
 const $=id=>document.getElementById(id);
 setupFourStudies();
 const groups={

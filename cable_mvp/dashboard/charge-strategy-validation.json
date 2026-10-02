@@ -1,0 +1,328 @@
+{
+  "version": "network20",
+  "method": "finite timetable-aware charge policies; independent paired validation, no optimality certificate",
+  "runtimeSeconds": 2.2507822,
+  "options": {
+    "runs": 100,
+    "seed": 3102,
+    "validationSeed": 93102,
+    "reliability": 0.9,
+    "deadline": 90,
+    "maxDrop": 2,
+    "maxLoadC": 2,
+    "maxLoadHub": 2,
+    "step": 1,
+    "failurePenalty": 30,
+    "rescueCost": 20,
+    "equipmentCost": 2,
+    "extraDepartureCost": 4,
+    "improvementSeed": 193102,
+    "refine": 1,
+    "medicalMinutes": 45,
+    "expressMinutes": 60,
+    "ordinaryMinutes": 90,
+    "networkSeed": 293102,
+    "shiftMinutes": 2,
+    "maxHold": 2,
+    "groundEnergyRate": 0.005,
+    "deviceCostPerMinute": 0.02,
+    "airportCostPerMinute": 0.05,
+    "leaderDepartureCost": 1,
+    "ordinaryTolerance": 0.02,
+    "landingCost": 0.2,
+    "chargeSlackEnergy": 0.02,
+    "chargeStrategySeed": 493102,
+    "chargeStudy": 1,
+    "chargeMaxSlots": 2,
+    "chargeSeed": 393102,
+    "chargePower": 0.2,
+    "chargeEfficiency": 0.9,
+    "chargeSetupMinutes": 1,
+    "chargeVisitCost": 0.5,
+    "chargeDeviceCostPerMinute": 0.01
+  },
+  "policy": {
+    "policy": "ready",
+    "shift": 0,
+    "hold": 0,
+    "extraDevice": 1
+  },
+  "chargingChoice": {
+    "policy": "ready",
+    "shift": 0,
+    "hold": 0,
+    "extraDevice": 1,
+    "groundStandby": 1,
+    "chargeSlots": 0,
+    "chargeStrategy": "full"
+  },
+  "strategySeeds": [
+    444868171,
+    4196256734,
+    423904218,
+    3498331283,
+    3971844257,
+    1399248264,
+    929827561,
+    3963344898,
+    1229609624,
+    2470191915,
+    1791148624,
+    3023003095,
+    3686282931,
+    2711076525,
+    50499870,
+    3942300087,
+    1960188223,
+    3209835426,
+    1961336998,
+    3817600911,
+    2794198050,
+    974202426,
+    3978118446,
+    629762287,
+    4065563430,
+    1994652842,
+    3057959036,
+    3531923301,
+    3448878435,
+    734667670,
+    3329837702,
+    3162764816,
+    1701631580,
+    1912038906,
+    1083842598,
+    514072310,
+    3510033079,
+    4187774068,
+    4202986658,
+    2175686201,
+    224053421,
+    248159980,
+    1363178699,
+    2994159273,
+    1393284351,
+    553224280,
+    3781144306,
+    193385206,
+    1982781901,
+    3387752962,
+    4007229107,
+    954182772,
+    3728270352,
+    3104259349,
+    3979208500,
+    2711519419,
+    1416195311,
+    2593172712,
+    2671892191,
+    888847654,
+    1248594203,
+    2166229021,
+    112166271,
+    2678183192,
+    1708670517,
+    3740442894,
+    4080760086,
+    1959568340,
+    2404614217,
+    566067922,
+    573579591,
+    861222695,
+    3215831556,
+    2194444121,
+    3810254079,
+    2836981693,
+    432263693,
+    796317030,
+    2773904677,
+    434679799,
+    1377942197,
+    2214435331,
+    333510712,
+    3297642888,
+    1983697233,
+    1110094083,
+    2705767372,
+    2458231894,
+    2636383023,
+    3625601320,
+    348886588,
+    1218929477,
+    1784867378,
+    1872922327,
+    1011740940,
+    1248315675,
+    291957857,
+    3021075770,
+    3475086055,
+    1580637193
+  ],
+  "cases": [
+    {
+      "battery": 5,
+      "choice": "full",
+      "review": {
+        "gain": {
+          "mean": 0,
+          "low": 0,
+          "high": 0
+        },
+        "ordinaryChange": {
+          "mean": 0,
+          "low": 0,
+          "high": 0
+        },
+        "recommended": false
+      },
+      "alternatives": [
+        {
+          "strategy": "full",
+          "rate": 1,
+          "interval": {
+            "low": 0.9630051925239981,
+            "high": 0.9999999999999999
+          },
+          "net": 210.10275312331964,
+          "grid": 0,
+          "chargeOccupancy": 0,
+          "p95": 32.98262617279347
+        },
+        {
+          "strategy": "next",
+          "rate": 1,
+          "interval": {
+            "low": 0.9630051925239981,
+            "high": 0.9999999999999999
+          },
+          "net": 210.10275312331964,
+          "grid": 0,
+          "chargeOccupancy": 0,
+          "p95": 32.98262617279347
+        },
+        {
+          "strategy": "remaining",
+          "rate": 1,
+          "interval": {
+            "low": 0.9630051925239981,
+            "high": 0.9999999999999999
+          },
+          "net": 210.10275312331964,
+          "grid": 0,
+          "chargeOccupancy": 0,
+          "p95": 32.98262617279347
+        }
+      ]
+    },
+    {
+      "battery": 3,
+      "choice": "remaining",
+      "review": {
+        "gain": {
+          "mean": 50.87723552357991,
+          "low": 39.18477379322766,
+          "high": 62.56969725393216
+        },
+        "ordinaryChange": {
+          "mean": -0.07492243867243867,
+          "low": -0.11194368863818857,
+          "high": -0.037901188706688765
+        },
+        "recommended": true
+      },
+      "alternatives": [
+        {
+          "strategy": "full",
+          "rate": 1,
+          "interval": {
+            "low": 0.9630051925239981,
+            "high": 0.9999999999999999
+          },
+          "net": 156.96035489008153,
+          "grid": 0.6186851654183595,
+          "chargeOccupancy": 3.353425827091796,
+          "p95": 33.66650090001459
+        },
+        {
+          "strategy": "next",
+          "rate": 1,
+          "interval": {
+            "low": 0.9630051925239981,
+            "high": 0.9999999999999999
+          },
+          "net": 203.6590743897722,
+          "grid": 0.11942575005518508,
+          "chargeOccupancy": 1.4471287502759256,
+          "p95": 32.98262617279347
+        },
+        {
+          "strategy": "remaining",
+          "rate": 1,
+          "interval": {
+            "low": 0.9630051925239981,
+            "high": 0.9999999999999999
+          },
+          "net": 207.83759041366142,
+          "grid": 0.16904519146996366,
+          "chargeOccupancy": 2.0052259573498175,
+          "p95": 32.98262617279347
+        }
+      ]
+    },
+    {
+      "battery": 2,
+      "choice": "next",
+      "review": {
+        "gain": {
+          "mean": -60.98960466321378,
+          "low": -72.71664665173903,
+          "high": -49.26256267468854
+        },
+        "ordinaryChange": {
+          "mean": 0.11345902137078603,
+          "low": 0.08291775846364653,
+          "high": 0.14400028427792555
+        },
+        "recommended": false
+      },
+      "alternatives": [
+        {
+          "strategy": "full",
+          "rate": 0.94,
+          "interval": {
+            "low": 0.8752303146877748,
+            "high": 0.9722142547333433
+          },
+          "net": 3.0516212525885673,
+          "grid": 3.8308231273869757,
+          "chargeOccupancy": 21.854115636934875,
+          "p95": 34.09090047915244
+        },
+        {
+          "strategy": "next",
+          "rate": 0.99,
+          "interval": {
+            "low": 0.9455124752390653,
+            "high": 0.9982326134344526
+          },
+          "net": -57.937983410625236,
+          "grid": 1.1586411698989887,
+          "chargeOccupancy": 9.163205849494942,
+          "p95": 34.38857815098533
+        },
+        {
+          "strategy": "remaining",
+          "rate": 0.91,
+          "interval": {
+            "low": 0.8377362530335634,
+            "high": 0.9519280048361151
+          },
+          "net": 73.20570341485299,
+          "grid": 2.0762580588292416,
+          "chargeOccupancy": 14.911290294146204,
+          "p95": 33.945706117612936
+        }
+      ]
+    }
+  ]
+}
