@@ -1,2 +1,2 @@
-import {jointStudy} from './joint.mjs?v=20261002-review15';
+import {jointStudy} from './joint.mjs?v=20261002-policy16';
 self.onmessage=({data})=>{try{const start=performance.now();const result=jointStudy(data.plan,data.options,(phase,done,total)=>{if(done%5===0||done===total)self.postMessage({phase,done,total})});result.runtimeMs=performance.now()-start;self.postMessage({result});}catch(e){self.postMessage({error:e.message});}};
