@@ -1,12 +1,13 @@
-import {flowSchedule} from './network_flow.mjs?v=20261002-policy16';
-import {missionLedger} from './mission_ledger.mjs?v=20261002-policy16';
-import {diagnoseJoint,summarizeDiagnostics} from './joint_diagnostics.mjs?v=20261002-policy16';
-import {generateDemand} from './random_demand.mjs?v=20261002-policy16';
-import {evaluateFour,winchTimes} from '../four_model.mjs?v=20261002-policy16';
-import {trialSeeds} from './repeated.mjs?v=20261002-policy16';
-import {wilson} from './paired_routes.mjs?v=20261002-policy16';
-export const JOINT_DEFAULTS={runs:100,seed:3102,validationSeed:93102,reliability:.9,deadline:90,maxDrop:2,maxLoadC:2,maxLoadHub:2,step:1,failurePenalty:30,rescueCost:20,equipmentCost:2,extraDepartureCost:4,improvementSeed:193102,refine:1,medicalMinutes:45,expressMinutes:60,ordinaryMinutes:90};
-export function jointOptions(input={}){const o={...JOINT_DEFAULTS,...input};trialSeeds(o.seed,o.runs);trialSeeds(o.validationSeed,o.runs);trialSeeds(o.improvementSeed,o.runs);if(![0,1].includes(o.refine))throw new Error("细查开关须为0或1");for(const k of ['reliability','deadline','maxDrop','maxLoadC','maxLoadHub','step','failurePenalty','rescueCost','equipmentCost','extraDepartureCost','medicalMinutes','expressMinutes','ordinaryMinutes'])if(!Number.isFinite(o[k])||o[k]<0)throw new Error(k+'须为非负有限数');if(o.reliability>1||o.deadline<=0||o.step<=0||o.runs>300||Math.max(o.maxDrop,o.maxLoadC,o.maxLoadHub)>20)throw new Error('门槛0–1，期限/步长须大于0，次数≤300，货量上限≤20');return o;}
+import {connectionStudy} from './connection_study.mjs?v=20261002-network17';
+import {flowSchedule} from './network_flow.mjs?v=20261002-network17';
+import {missionLedger} from './mission_ledger.mjs?v=20261002-network17';
+import {diagnoseJoint,summarizeDiagnostics} from './joint_diagnostics.mjs?v=20261002-network17';
+import {generateDemand} from './random_demand.mjs?v=20261002-network17';
+import {evaluateFour,winchTimes} from '../four_model.mjs?v=20261002-network17';
+import {trialSeeds} from './repeated.mjs?v=20261002-network17';
+import {wilson} from './paired_routes.mjs?v=20261002-network17';
+export const JOINT_DEFAULTS={runs:100,seed:3102,validationSeed:93102,reliability:.9,deadline:90,maxDrop:2,maxLoadC:2,maxLoadHub:2,step:1,failurePenalty:30,rescueCost:20,equipmentCost:2,extraDepartureCost:4,improvementSeed:193102,refine:1,medicalMinutes:45,expressMinutes:60,ordinaryMinutes:90,networkSeed:293102,shiftMinutes:2,maxHold:2,groundEnergyRate:.005,deviceCostPerMinute:.02,airportCostPerMinute:.05,leaderDepartureCost:1,ordinaryTolerance:.02};
+export function jointOptions(input={}){const o={...JOINT_DEFAULTS,...input};trialSeeds(o.seed,o.runs);trialSeeds(o.validationSeed,o.runs);trialSeeds(o.improvementSeed,o.runs);trialSeeds(o.networkSeed,o.runs);if(o.shiftMinutes>10||o.maxHold>10||o.ordinaryTolerance>1)throw new Error("班次调整/等待上限10分钟，普通货物容忍度0–1");if(![0,1].includes(o.refine))throw new Error("细查开关须为0或1");for(const k of ['reliability','deadline','maxDrop','maxLoadC','maxLoadHub','step','failurePenalty','rescueCost','equipmentCost','extraDepartureCost','medicalMinutes','expressMinutes','ordinaryMinutes','shiftMinutes','maxHold','groundEnergyRate','deviceCostPerMinute','airportCostPerMinute','leaderDepartureCost','ordinaryTolerance'])if(!Number.isFinite(o[k])||o[k]<0)throw new Error(k+'须为非负有限数');if(o.reliability>1||o.deadline<=0||o.step<=0||o.runs>300||Math.max(o.maxDrop,o.maxLoadC,o.maxLoadHub)>20)throw new Error('门槛0–1，期限/步长须大于0，次数≤300，货量上限≤20');return o;}
 const grid=(max,step)=>{const n=Math.ceil(max/step);if(n>100)throw new Error('网格过细');return Array.from({length:n+1},(_,i)=>Math.min(max,i*step))};
 export function jointInput(p,mission,background,candidate){
  const {branch,dC,lC,lHub}=candidate,timing=winchTimes(p,dC,lC,lHub),target=background.length;
@@ -54,5 +55,6 @@ export function jointStudy(plan,input={},progress=()=>{}){
  const policies=['strict','ready','deadline'].map(policy=>({policy,result:assess({...p,dispatchPolicy:policy},mission,bg,validationSeeds,picked,o,true)}));
  const policyChoice=policies.filter(x=>x.result.passed).sort((a,b)=>b.result.meanObjective-a.result.meanObjective)[0]??null;
  const policyReview=policyChoice?{policy:policyChoice.policy,result:assess({...p,dispatchPolicy:policyChoice.policy},mission,improvementSeeds.map(batchSeed=>generateDemand({...p,batchSeed})),improvementSeeds,picked,o,true)}:null;
- return {policies,policyReview,coarseCount,improvementSeeds,improvementReview,sensitivity,improvements,diagnosticReview,method:'finite-grid-enumeration',status:!selected?'no-screening-candidate':validation.passed?'validated-grid-candidate':'holdout-failed',parameters:p,mission,options:o,seeds,validationSeeds,candidates,selected,validation,recommendation:validation?.passed?selected:null,scope:'固定额外A→B任务，随机全入口背景；收益为截止/电量停止时刻的分段账本，加未完成罚损及救援估计；改善措施先探索后以第三组独立样本复核；敏感性固定任务及装卸决策，非重新优化；95% Wilson下界筛选并独立复核，不是全网最优或真实可靠性认证'};
+ const connections=connectionStudy(p,mission,picked,o,validationSeeds,[p.batchSeed,...seeds,...validationSeeds,...improvementSeeds],jointInput,progress);
+ return {connections,policies,policyReview,coarseCount,improvementSeeds,improvementReview,sensitivity,improvements,diagnosticReview,method:'finite-grid-enumeration',status:!selected?'no-screening-candidate':validation.passed?'validated-grid-candidate':'holdout-failed',parameters:p,mission,options:o,seeds,validationSeeds,candidates,selected,validation,recommendation:validation?.passed?selected:null,scope:'固定额外A→B任务，随机全入口背景；收益为截止/电量停止时刻的分段账本，加未完成罚损及救援估计；改善措施先探索后以第三组独立样本复核；敏感性固定任务及装卸决策，非重新优化；95% Wilson下界筛选并独立复核，不是全网最优或真实可靠性认证'};
 }

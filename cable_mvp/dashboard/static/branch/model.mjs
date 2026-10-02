@@ -1,5 +1,5 @@
-import {RANDOM_DEFAULTS} from './random_demand.mjs?v=20261002-policy16';
-import {FOUR_DEFAULTS,validateFour,optimizeFour,scheduleFour,evaluateFour,cruiseFour} from '../four_model.mjs?v=20261002-policy16';
+import {RANDOM_DEFAULTS} from './random_demand.mjs?v=20261002-network17';
+import {FOUR_DEFAULTS,validateFour,optimizeFour,scheduleFour,evaluateFour,cruiseFour} from '../four_model.mjs?v=20261002-network17';
 export const BRANCH_DEFAULTS={...FOUR_DEFAULTS,...RANDOM_DEFAULTS,routeMode:1,capacityMode:3,serviceEnabledC:1,serviceServersC:1,backgroundServiceC:[2,2,2,2,2,2],battery:5,localRateCE:1.4,localRateEB:1.4,branches:['D','E','D','E','D','E'],destinations:['D','E','B','B','B','B'],ce:30,eb:20,departuresCE:[22,26,30,34,38,42,46],departuresEB:[40,44,48,52,56,60,64,68],localProbabilityCE:.8,localProbabilityEB:.8};
 export function branchParameters(input){
  const p={...BRANCH_DEFAULTS,...input,stationCount:4};

@@ -1,12 +1,12 @@
-import {setupJoint,updateJoint} from './joint_ui.mjs?v=20261002-policy16';
-import {simulateFull,deliveredCargo} from './full_model.mjs?v=20261002-policy16';
-import {localAtTime} from '../local_queue.mjs?v=20261002-policy16';
-import {nodeState} from './node_state.mjs?v=20261002-policy16';
-import {liveMetrics} from './live_metrics.mjs?v=20261002-policy16';
-import {legacyGroups} from './parameter_groups.mjs?v=20261002-policy16';
-import {effectivePayload,routeDistance,optimizeFour} from '../four_model.mjs?v=20261002-policy16';
-import {setupFourStudies,runFourStudies} from '../four_studies_ui.mjs?v=20261002-policy16';
-import {BRANCH_DEFAULTS,chooseBranch,queueCount} from './model.mjs?v=20261002-policy16';
+import {setupJoint,updateJoint} from './joint_ui.mjs?v=20261002-network17';
+import {simulateFull,deliveredCargo} from './full_model.mjs?v=20261002-network17';
+import {localAtTime} from '../local_queue.mjs?v=20261002-network17';
+import {nodeState} from './node_state.mjs?v=20261002-network17';
+import {liveMetrics} from './live_metrics.mjs?v=20261002-network17';
+import {legacyGroups} from './parameter_groups.mjs?v=20261002-network17';
+import {effectivePayload,routeDistance,optimizeFour} from '../four_model.mjs?v=20261002-network17';
+import {setupFourStudies,runFourStudies} from '../four_studies_ui.mjs?v=20261002-network17';
+import {BRANCH_DEFAULTS,chooseBranch,queueCount} from './model.mjs?v=20261002-network17';
 const $=id=>document.getElementById(id),fmt=n=>n===null||n===undefined?'—':Number(n).toFixed(2);
 const fields=[['demandMode','需求模式：0固定算例 / 1全入口随机'],['sourceEnd','源需求生成截止 / min'],['sourceRateA','A源需求 / 架·min⁻¹'],['sourceRateCD','C→D源需求 / 架·min⁻¹'],['sourceRateCE','C→E源需求 / 架·min⁻¹'],['sourceRateD','D→B源需求 / 架·min⁻¹'],['sourceRateE','E→B源需求 / 架·min⁻¹'],['destinationBShare','A/C需求终点B比例 / 0–1'],['branchDShare','A需求经D比例 / 0–1'],['cargoMin','随机q货量下限 / kg'],['cargoMax','随机q货量上限 / kg'],['medicalShare','医疗货物比例 / 0–1'],['expressShare','快件比例 / 0–1'],['medicalFeeFactor','医疗收费倍率'],['expressFeeFactor','快件收费倍率'],['routeMode','目标机选路：0手动 / 1收益 / 2时间 / 3耗电'],['target','目标机编号（0=F1）'],['batchSeed','随机种子'],['capacityMode','容量模式：0固定 / 2独立抽样 / 3连续到达'],['seatsC','固定模式 C→分支 空位'],['seatsD','固定模式 分支→B 空位'],['serviceEnabledC','C共享作业设备 / 0或1'],['serviceServersC','C作业设备数量 / 台'],['localWarmup','首班前预热 / min'],['localRateC','C→D 本地到达率 / 架·min⁻¹'],['localRateCE','C→E 本地到达率 / 架·min⁻¹'],['localRateD','D→B 本地到达率 / 架·min⁻¹'],['localRateEB','E→B 本地到达率 / 架·min⁻¹'],['batchMax','随机编队上限'],['batchReserve','预留空位'],['localProbabilityC','C→D 模式2本地需求概率'],['localProbabilityCE','C→E 模式2本地需求概率'],['localProbabilityD','D→B 模式2本地需求概率'],['localProbabilityEB','E→B 模式2本地需求概率'],['ac','A→C / km'],['cd','C→D / km'],['ce','C→E / km'],['db','D→B / km'],['eb','E→B / km'],['direct','直飞 A→B / km'],['speed','速度 / km/h'],['battery','任务电量 / kWh'],['q','固定算例货量 q / kg'],['bay','索降仓 / kg'],['eta','编队减阻参数 η'],['chi','气动占比 χ'],['loiterRate','等待耗电 / kWh/min'],['feeQ','q 收费 / 元/kg'],['feeDropC','A→C 收费 / 元/kg'],['feeLoadC','C→分支站 收费 / 元/kg'],['feeLoadD','分支站→B 收费 / 元/kg'],['energyPrice','电价 / 元/kWh'],['departuresC','C→D 发车分钟','list'],['departuresCE','C→E 发车分钟','list'],['departuresD','D→B 发车分钟','list'],['departuresEB','E→B 发车分钟','list']];
 for(const [key,label,type]of fields){const wrap=document.createElement('label');wrap.textContent=label;const input=document.createElement('input');input.id='p_'+key;input.type=type==='list'?'text':'number';input.step='any';wrap.append(input);$('fields').append(wrap)}
@@ -18,7 +18,7 @@ setupFourStudies();setupJoint();
 let pairedWorker=null,pairedResult=null,appliedForm=null;
 function invalidatePaired(){if(pairedWorker)pairedWorker.terminate();pairedWorker=null;pairedResult=null;$('pairedRows').replaceChildren();$('pairedValidation').replaceChildren();$('pairedDifference').textContent='';$('pairedRecommendation').textContent='';$('applyPaired').disabled=true;$('exportPaired').disabled=true;$('pairedStatus').textContent='主参数已更新，请重跑配对实验。';}
 function runPaired(){if(!plan||plan.p.demandMode===1)return;const options={runs:Number($('pairedRuns').value),seed:Number($('pairedSeed').value),validationSeed:Number($('pairedValidationSeed').value),longWait:Number($('repeatLong').value)};invalidatePaired();$('pairedStatus').textContent='正在比较两条路线…';
- try{const worker=new Worker('./paired_routes_worker.mjs?v=20261002-policy16',{type:'module'});pairedWorker=worker;worker.onmessage=({data})=>{if(pairedWorker!==worker)return;if(data.error){$('pairedStatus').textContent='实验未完成：'+data.error;worker.terminate();pairedWorker=null;return}if(data.phase){$('pairedStatus').textContent=data.phase+' '+data.done+' / '+data.total;return}
+ try{const worker=new Worker('./paired_routes_worker.mjs?v=20261002-network17',{type:'module'});pairedWorker=worker;worker.onmessage=({data})=>{if(pairedWorker!==worker)return;if(data.error){$('pairedStatus').textContent='实验未完成：'+data.error;worker.terminate();pairedWorker=null;return}if(data.phase){$('pairedStatus').textContent=data.phase+' '+data.done+' / '+data.total;return}
  const v=data.result;pairedResult=v;worker.terminate();pairedWorker=null;$('pairedStatus').textContent='选择阶段每路 '+v.options.runs+' 次（种子'+v.options.seed+'），独立复核 '+(v.validation?v.options.runs:0)+' 次（种子'+v.options.validationSeed+'）；排除训练及重叠种子。';
  for(const c of v.candidates){if(!c.result){cells($('pairedRows'),['经'+c.branch,c.reason,'—','—','—','—','—']);continue}const r=c.result,x=r.target;cells($('pairedRows'),['经'+c.branch,[r.task.dC,r.task.lC,r.task.lHub].map(fmt).join('/'),percent(x.feasible/r.runs)+' ['+percent(c.interval.low)+', '+percent(c.interval.high)+']',percent(x.arrivedB/r.runs),fmt(x.p95Wait),fmt(x.meanNet),fmt(x.meanEnergy)]);}
  if(v.paired){const d=v.paired,interval=(x,unit)=>x.mean===null?'无共同可执行样本':fmt(x.mean)+unit+(x.low!==null?'（约95%区间 '+fmt(x.low)+'至'+fmt(x.high)+unit+'）':'（样本不足或无变动，区间不适用）');$('pairedDifference').textContent='仅D可执行 '+d.onlyD+' 次，仅E可执行 '+d.onlyE+' 次，两路都可执行 '+d.both+' 次，两路都不可执行 '+d.neither+' 次。配对E−D：可执行率 '+interval({...d.feasible,mean:d.feasible.mean*100,low:d.feasible.low===null?null:d.feasible.low*100,high:d.feasible.high===null?null:d.feasible.high*100},'个百分点')+'；共同可执行样本净收益差 '+interval(d.net,'元')+'，耗电差 '+interval(d.energy,'kWh')+'。';}
@@ -35,7 +35,7 @@ function renderRoutes(){
 }
 const percent=x=>x===null||x===undefined?'—':(x*100).toFixed(1)+'%';
 function runRepeated(){if(!plan)return;const options={runs:Number($('repeatRuns').value),seed:Number($('repeatSeed').value),longWait:Number($('repeatLong').value)};invalidateRepeated();$('repeatStatus').textContent='正在生成不同种子的队列样本…';
- try{const worker=new Worker('./repeated_worker.mjs?v=20261002-policy16',{type:'module'});repeatWorker=worker;
+ try{const worker=new Worker('./repeated_worker.mjs?v=20261002-network17',{type:'module'});repeatWorker=worker;
  worker.onmessage=({data})=>{if(repeatWorker!==worker)return;if(data.error){$('repeatStatus').textContent='统计未完成：'+data.error;worker.terminate();repeatWorker=null;return}if(data.progress){$('repeatStatus').textContent='重复仿真 '+data.progress+' / '+data.total;return}
  repeatResult=data.result;const v=repeatResult,t=v.target;worker.terminate();repeatWorker=null;$('repeatStatus').textContent=v.fullNetwork?v.runs+'次完整随机网络，种子'+v.seed+'；所有入口、目的地、货类和货量重新抽样。':v.runs+'次，种子'+v.seed+'，固定经'+v.route+'；dC/lC/lHub='+[v.task.dC,v.task.lC,v.task.lHub].join('/')+' kg。'+(v.mode===0?'固定模式没有随机容量，重复结果相同。':'');
  if(v.fullNetwork)cardSet('repeatTarget',[['累计源需求',v.generated+' 架'],['累计完整交付',v.completed+' 架'],['未完成比例',percent(v.uncompletedShare)],['平均每次交付货量',fmt(v.meanDeliveredCargo)+' kg']]);else cardSet('repeatTarget',[['抵达B频率',percent(t.arrivedB/v.runs)],['电量内可执行频率',percent(t.feasible/v.runs)],['抵达者平均耗电',fmt(t.meanEnergy)+' kWh'],['可执行者平均净收益',fmt(t.meanNet)+' 元'],['抵达者总滞留P95',fmt(t.p95Wait)+' min']]);
