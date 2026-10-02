@@ -1,0 +1,30 @@
+{
+  "version": "network18",
+  "runtimeSeconds": 1.4008441,
+  "configs": 36,
+  "choice": {
+    "policy": "ready",
+    "shift": 0,
+    "hold": 0,
+    "extraDevice": 1
+  },
+  "meanNet": 226.1262371723367,
+  "baseline": 162.87310023919486,
+  "gain": {
+    "mean": 63.2531369331417,
+    "low": 39.395622426769876,
+    "high": 87.11065143951352
+  },
+  "targetRate": 1,
+  "targetInterval": {
+    "low": 0.9630051925239981,
+    "high": 0.9999999999999999
+  },
+  "ordinary": {
+    "mean": -0.025946484071484074,
+    "low": -0.039149868160342584,
+    "high": -0.012743099982625563
+  },
+  "recommended": true,
+  "terminated": 51
+}

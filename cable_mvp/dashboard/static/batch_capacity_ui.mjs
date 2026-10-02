@@ -1,4 +1,4 @@
-import {activeStations,batchPressure,stationTrips} from './batch_capacity.mjs?v=20261002-network17';
+import {activeStations,batchPressure,stationTrips} from './batch_capacity.mjs?v=20261002-network19';
 const $=id=>document.getElementById(id),fmt=x=>x===null||x===undefined?'—':Number(x).toFixed(2);
 const keys=['batchSize','batchLocal','batchReserved'];
 function defaults(p,s,i){const size=p['batchSize'+s]?.[i]??Math.max(p.formationSize,p['seats'+s]+1);return [size,p['batchLocal'+s]?.[i]??Math.max(1,size-p['seats'+s]),p['batchReserved'+s]?.[i]??0]}

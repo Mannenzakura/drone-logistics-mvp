@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import {simulateFull} from '../static/branch/full_model.mjs';
+import {eventSchedule} from '../static/branch/event_network.mjs';
+import {networkLedger} from '../static/branch/network_economics.mjs';
+import {JOINT_DEFAULTS} from '../static/branch/joint.mjs';
+const p={...simulateFull({}).p,ac:1,fullCD:1,fullCE:1,fullDB:1,fullEB:1,speed:60,battery:10,energyReserve:0,serviceEnabledC:1,serviceServersC:1,sharedC:0,sharedD:0,target:-1,departuresC:[6],departuresCE:[],departuresD:[8],departuresEB:[],batchMax:3,batchReserve:0,joinBuffer:0};
+const job=(id,created,workC,due=90)=>({id,origin:'C',branch:'D',destination:'B',created,weight:1,dropC:0,loadC:0,loadHub:0,workC,workHub:0,cargoType:'普通',feeFactor:1,dispatchDeadline:due});
+const input={...p,fullJobs:[job(0,0,20,2),job(1,1,1)]};const s=eventSchedule(input,0,0,JOINT_DEFAULTS);
+assert.equal(s.rows[0].terminatedAt,2);assert.equal(s.rows[0].departC,null);assert.equal(s.rows[1].serviceStartC,2);assert.equal(s.rows[1].serviceEndC,3);assert.equal(s.rows[1].arrivalB,9);assert.ok(s.batches.every(b=>!b.flights.includes(0)));
+const ledger=networkLedger(input,s,JOINT_DEFAULTS);assert.equal(ledger.completed,1);assert.equal(ledger.tasks[0].ledger.revenue,0);assert.ok(!ledger.tasks[0].depleted);assert.ok(ledger.tasks[0].ledger.energy<=p.battery);
+const low={...p,battery:.11,departuresD:[7],fullJobs:[job(0,0,20),job(1,1,0)]},sl=eventSchedule(low,0,0,JOINT_DEFAULTS);assert.ok(sl.rows[0].terminatedAt<3);assert.equal(sl.rows[1].serviceStartC,sl.rows[0].terminatedAt);assert.ok(sl.rows[1].completionTime!==null);
+for(const r of sl.rows)assert.ok(r.energySegments.reduce((a,x)=>a+x.energy,0)<=low.battery+1e-8);
+const empty=eventSchedule({...p,fullJobs:[]},0,0,JOINT_DEFAULTS);assert.equal(empty.rows.length,0);assert.equal(empty.eventDriven,true);
+const huge=eventSchedule({...p,fullJobs:[{...job(0,0,0),weight:100}]},0,0,JOINT_DEFAULTS);assert.equal(huge.rows[0].terminatedAt,0);assert.equal(huge.rows[0].arrivalC,null);
+assert.deepEqual(s,eventSchedule(input,0,0,JOINT_DEFAULTS));assert.ok(s.events.every((x,i)=>i===0||x.time>=s.events[i-1].time));
+console.log('PASS causal deadline/energy termination, immediate device release, reclaimed seats, physical rejection, ledger cutoff and determinism');
