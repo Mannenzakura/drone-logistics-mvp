@@ -1,4 +1,4 @@
-import {assignService} from '../shared_service.mjs?v=20261001-full10';
+import {assignService} from '../shared_service.mjs?v=20261002-review15';
 export function flowSchedule(p,workC=0,workHub=0,options={}){
  const ac=p.ac/p.speed*60,dist={D:p.fullCD??p.cd,E:p.fullCE??p.ce},lastDist={D:p.fullDB??p.db,E:p.fullEB??p.eb};
  const rows=p.fullJobs.map(j=>({...j,arrivalC:['A','C'].includes(j.origin)?j.created+(j.origin==='A'?ac:0)+(options.arrivalDelay?.[j.id]??0):null,departC:null,waitC:null,arrivalD:['D','E'].includes(j.origin)?j.created:null,departD:null,waitD:null,arrivalB:null,completionTime:null,serviceStartC:null,serviceEndC:null,serviceQueueC:0,serviceServerC:null,workC:(j.id===p.target?workC:j.workC)+(options.extraC?.[j.id]??0),workD:(j.id===p.target?workHub:j.workHub)+(options.extraD?.[j.id]??0)}));

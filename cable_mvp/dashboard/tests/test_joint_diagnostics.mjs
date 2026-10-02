@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {simulateFull} from '../static/branch/full_model.mjs';
+import {jointStudy,jointInput} from '../static/branch/joint.mjs';
+import {diagnoseJoint} from '../static/branch/joint_diagnostics.mjs';
+const p=simulateFull({}),c={branch:'D',dC:0,lC:0,lHub:0},input=jointInput(p.p,p.target,[],c);
+assert.equal(diagnoseJoint(input,c,1).reason,'超过交付期限');
+assert.equal(diagnoseJoint({...input,battery:.01,energyReserve:0},c,90).reason,'电量不足');
+assert.equal(diagnoseJoint({...input,batchMax:1,batchReserve:0},c,90).reason,'C班次容量或FIFO阻塞');
+assert.equal(diagnoseJoint({...input,payloadLimit:1,enforceReferencePayload:0},c,90).reason,'载荷或仓容超限');
+const r=jointStudy(p),d=r.validation.diagnostics;assert.equal(Object.values(d.reasons).reduce((s,n)=>s+n,0),100);assert.equal(d.failures,100-r.validation.successes);
+for(const t of r.validation.trials)assert.equal(t.success,t.diagnostic.success);
+assert.equal(d.waits.batchWaitC.n+d.cUnserved,100);assert.equal(d.waits.batchWaitC.histogram.reduce((s,n)=>s+n,0),d.waits.batchWaitC.n);
+const no=jointStudy(p,{deadline:1,runs:5,maxDrop:0,maxLoadC:0,maxLoadHub:0});assert.equal(no.validation,null);assert.equal(no.diagnosticReview.diagnostics.failures,5);assert.equal(no.recommendation,null);
+console.log('PASS diagnostic reason boundaries, accounting, no zero wait for unserved, and non-recommended review');

@@ -1,4 +1,4 @@
-import {evaluateFour,scheduleFour,routeDistance,cruiseFour} from './four_model.mjs?v=20261001-full10';
+import {evaluateFour,scheduleFour,routeDistance,cruiseFour} from './four_model.mjs?v=20261002-review15';
 const safe=(p,d,c,l)=>{try{return evaluateFour(p,d,c,l)}catch{return null}};
 const summary=r=>r?{net:r.net,energy:r.energy,dC:r.dC,lC:r.lC,lD:r.lD,departC:r.target.departC,departD:r.target.departD,arrivalD:r.target.arrivalD,waitC:r.target.waitC,waitD:r.target.waitD}:null;
 export function fourStudies(plan,options={}){
@@ -21,6 +21,7 @@ export function fourStudies(plan,options={}){
   for(let y=0;y<n;y++)for(let x=0;x<n;x++){
     const distance=distanceMax*(x+1)/n,q=payloadMax*y/(n-1),scale=distance/total;
     const params={...p,q,ac:p.ac*scale,cd:p.cd*scale,db:p.db*scale,de:p.de*scale,eb:p.eb*scale};
+    if(p.fullJobs){params.fullCD=p.fullCD*scale;params.fullCE=p.fullCE*scale;params.fullDB=p.fullDB*scale;params.fullEB=p.fullEB*scale;}
     const f=safe(params,plan.dC,plan.lC,plan.lD);
     const s=safe({...params,role:0,soloIndependent:1},plan.dC,plan.lC,plan.lD);
     const delta=f&&s?f.net-s.net:null;
