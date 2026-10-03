@@ -1,0 +1,20 @@
+import {BRANCH_DEFAULTS} from './model.mjs?v=20261003-network28';
+import {validateFour,evaluateFour,cruiseFour,effectivePayload,winchTimes} from '../four_model.mjs?v=20261003-network28';
+import {RANDOM_DEFAULTS,generateDemand,validateSources} from './random_demand.mjs?v=20261003-network28';
+import {flowSchedule} from './network_flow.mjs?v=20261003-network28';
+export function deliveredCargo(r,time,p){const rates=winchTimes(p,r.dropC,r.loadC,r.loadHub),drop=p.winchTiming?rates.drop:p.tDropC,hubDrop=p.winchTiming?rates.drop:p.tDropD;let kg=0;if(r.completionTime!==null&&r.completionTime<=time)kg+=r.weight+r.loadHub;if(r.arrivalC!==null&&r.serviceStartC!==null&&time>=r.serviceStartC+(p.winchTiming?p.approachC:p.t0C)+drop*r.dropC)kg+=r.dropC;if(r.arrivalD!==null&&time>=r.serviceStartHub+(p.winchTiming?p.approachD:p.t0D)+hubDrop*r.loadC)kg+=r.loadC;return kg;}
+
+export function simulateFull(input){
+ const base={...BRANCH_DEFAULTS,...RANDOM_DEFAULTS,...input,demandMode:1};validateSources(base);if(base.capacityMode!==3)throw new Error('全入口随机模式使用容量模式3；固定/独立抽样请切回固定算例');
+ for(const branch of ['D','E']){const check={...base,target:0,arrivalsC:[0],backgroundServiceC:[0],backgroundServiceD:[0],destinations:['B'],cd:branch==='E'?base.ce:base.cd,db:branch==='E'?base.eb:base.db};validateFour(check);if(base.cargoMax+Math.min(base.bay,2)>effectivePayload(check))throw new Error('随机货量上限加中转新货超过有效载荷，请减小货量上限');}
+ const jobs=generateDemand(base),targetJob=jobs.find(j=>j.origin==='A'&&j.destination==='B')??null,target=targetJob?.id??-1;
+ const p={...base,fullJobs:jobs,target,fullSelectedBranch:targetJob?.branch??'D',fullCD:base.cd,fullCE:base.ce,fullDB:base.db,fullEB:base.eb,arrivalsC:jobs.map(j=>['A','C'].includes(j.origin)?j.created+(j.origin==='A'?base.ac/base.speed*60:0):0),branches:jobs.map(j=>j.branch),destinations:jobs.map(j=>j.destination),backgroundServiceC:jobs.map(j=>j.workC),backgroundServiceD:jobs.map(j=>j.workHub)};
+ let schedule,economics=null,failure=null;
+ if(targetJob){const q={...p,q:targetJob.weight,cd:targetJob.branch==='E'?base.ce:base.cd,db:targetJob.branch==='E'?base.eb:base.db,destinations:jobs.map(j=>j.destination==='B'?'B':'D'),feeQ:base.feeQ*targetJob.feeFactor,feeDropC:base.feeDropC*targetJob.feeFactor,feeLoadC:base.feeLoadC*targetJob.feeFactor,feeLoadD:base.feeLoadD*targetJob.feeFactor,demandDropC:Math.max(base.demandDropC,targetJob.dropC),demandLoadC:Math.max(base.demandLoadC,targetJob.loadC),demandLoadD:Math.max(base.demandLoadD,targetJob.loadHub)};
+ economics=evaluateFour(q,targetJob.dropC,targetJob.loadC,targetJob.loadHub);schedule=economics?.schedule??flowSchedule(q,targetJob.workC,targetJob.workHub);
+ if(economics){const matched=evaluateFour(q,0,0,0),directMinutes=q.direct/q.speed*60,directEnergy=q.direct*(q.k0+q.kLoad*q.q),directFeasible=(q.allowExtrapolation||q.direct<=q.referenceRange)&&directEnergy<=q.battery-q.energyReserve,net=directFeasible?q.feeQ*q.q-q.timeQ*q.q*directMinutes-q.handlingQ*q.q-q.energyPrice*directEnergy:null;economics={...economics,matched,direct:{time:directMinutes,energy:directEnergy,net,feasible:directFeasible},checked:1,feasible:1,extraCargoNet:matched?economics.net-matched.net:null,matchedDelta:matched&&directFeasible?matched.net-net:null};}
+ else failure=schedule.rows[target].arrivalB===null?'追踪飞机未获得完整后续班次':'追踪任务超出电量或载荷/作业约束；网络仍显示实际排程';
+ }else schedule=flowSchedule(p,0,0);
+ const rows=schedule.rows.map(r=>({...r,arrivalHub:r.arrivalD,departHub:r.departD,waitHub:r.waitD,workHub:r.workD})),horizon=Math.max(base.sourceEnd,...base.departuresC,...base.departuresCE,...base.departuresD,...base.departuresEB,...rows.map(r=>r.completionTime??0));
+ return {p,rows,batches:schedule.batches,events:schedule.events,horizon,target:target<0?null:rows[target],economics,failure,routeComparison:[],networkSummary:{generated:jobs.length,completed:rows.filter(r=>r.completionTime!==null).length,plannedCargo:rows.reduce((v,r)=>v+r.weight+r.dropC+r.loadC+r.loadHub,0),deliveredCargo:rows.reduce((v,r)=>v+deliveredCargo(r,horizon,p),0)}};
+}

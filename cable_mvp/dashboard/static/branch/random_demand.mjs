@@ -1,5 +1,5 @@
-import {winchTimes} from '../four_model.mjs?v=20261003-network26';
-import {generateLocalArrivals} from '../local_queue.mjs?v=20261003-network26';
+import {winchTimes} from '../four_model.mjs?v=20261004-network29';
+import {generateLocalArrivals} from '../local_queue.mjs?v=20261004-network29';
 export const RANDOM_DEFAULTS={demandMode:0,sourceEnd:24,sourceRateA:.2,sourceRateCD:.08,sourceRateCE:.08,sourceRateD:.08,sourceRateE:.08,destinationBShare:.6,branchDShare:.5,cargoMin:1,cargoMax:5,medicalShare:.1,expressShare:.3,medicalFeeFactor:1.8,expressFeeFactor:1.3};
 export function validateSources(p){
  if(![0,1].includes(p.demandMode))throw new Error('需求模式须为0固定算例或1全入口随机');

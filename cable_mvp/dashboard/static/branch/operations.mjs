@@ -1,9 +1,9 @@
-import {generateDemand} from './random_demand.mjs?v=20261003-network26';
-import {jointInput,JOINT_DEFAULTS} from './joint.mjs?v=20261003-network26';
-import {eventSchedule} from './event_network.mjs?v=20261003-network26';
-import {networkLedger} from './network_economics.mjs?v=20261003-network26';
-import {trialSeeds} from './repeated.mjs?v=20261003-network26';
-import {pairedInterval} from './joint_event_assess.mjs?v=20261003-network26';
+import {generateDemand} from './random_demand.mjs?v=20261004-network29';
+import {jointInput,JOINT_DEFAULTS} from './joint.mjs?v=20261004-network29';
+import {eventSchedule} from './event_network.mjs?v=20261004-network29';
+import {networkLedger} from './network_economics.mjs?v=20261004-network29';
+import {trialSeeds} from './repeated.mjs?v=20261004-network29';
+import {pairedInterval} from './joint_event_assess.mjs?v=20261004-network29';
 export const OPERATIONS_DEFAULTS={runs:30,seed:693103,reviewSeed:793103,rateScale:.1,interval:20,nightFactor:.35,peakFactor:1.8,weatherRate:.08,weatherDuration:20,faultRate:.04,faultDuration:15,reliability:.9,ordinaryTolerance:.02,padCount:2,movementChannels:1,padCostPerMinute:.005,movementCostPerMinute:.005,deviceCostPerMinute:.02,airportCostPerMinute:.05,chargeDeviceCostPerMinute:.01,faultRepairCost:5};
 export function options(input={}){const o={...OPERATIONS_DEFAULTS,...input};for(const [k,v]of Object.entries(o))if(!Number.isFinite(v)||v<0)throw new Error(k+'须为非负有限数');if(!Number.isInteger(o.runs)||o.runs<2||o.runs>100||o.interval<5||o.interval>120||o.rateScale>1||o.nightFactor>10||o.peakFactor>10||o.weatherRate>1||o.faultRate>1||o.reliability>1||o.ordinaryTolerance>1||o.weatherDuration>120||o.faultDuration>120)throw new Error('次数2–100，班次间隔5–120分钟；概率0–1，倍率与扰动时长须在范围内');if(!Number.isInteger(o.padCount)||o.padCount<0||o.padCount>18||!Number.isInteger(o.movementChannels)||o.movementChannels<1||o.movementChannels>8)throw new Error("停机位0–18、通道1–8整数，预留增加2的探索空间");trialSeeds(o.seed,o.runs);trialSeeds(o.reviewSeed,o.runs);return o;}
 export function disruptionCalendar(seed,o){let s=(seed^0xa5b35705)>>>0;const rand=()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return(s+.5)/4294967296},events=[];for(let h=0;h<Math.ceil((o.horizon??1440)/60);h++){if(rand()<o.weatherRate){const start=h*60+rand()*60;events.push({type:'weather',station:'all',start,end:Math.min(o.horizon??1440,start+o.weatherDuration)})}for(const station of ['C','D','E'])if(rand()<o.faultRate){const start=h*60+rand()*60;events.push({type:'movement',station,start,end:Math.min(o.horizon??1440,start+o.faultDuration)})}if(rand()<o.faultRate){const start=h*60+rand()*60;events.push({type:'device',station:'C',start,end:Math.min(o.horizon??1440,start+o.faultDuration)})}}return events.filter(x=>x.end>x.start&&x.start<(o.horizon??1440)).sort((a,b)=>a.start-b.start);}

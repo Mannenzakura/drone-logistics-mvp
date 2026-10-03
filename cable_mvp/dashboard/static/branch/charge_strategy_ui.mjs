@@ -1,5 +1,5 @@
-import {CHARGE_NAMES} from './charge_planner.mjs?v=20261003-network26';
-import {renderEventComparison} from './event_view.mjs?v=20261003-network26';
+import {CHARGE_NAMES} from './charge_planner.mjs?v=20261004-network29';
+import {renderEventComparison} from './event_view.mjs?v=20261004-network29';
 const fmt=x=>x==null?'—':Number(x).toFixed(2),pct=x=>(x*100).toFixed(1)+'%';
 export function renderChargeStrategies(el,charging){
  el.replaceChildren();const cases=charging?.strategies??[];if(!cases.length){el.textContent='开启有限充电实验并允许至少一个充电位后显示。';return}

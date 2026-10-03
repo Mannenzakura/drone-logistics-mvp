@@ -1,4 +1,4 @@
-import {winchTimes,effectivePayload} from '../four_model.mjs?v=20261003-network26';
+import {winchTimes,effectivePayload} from '../four_model.mjs?v=20261004-network29';
 // Only the observed snapshot is accepted: unpublished future arrivals are absent.
 export function chooseOnline(p,job,observed,now,o={}){
  if(job.destination!=='B'||!['A','C'].includes(job.origin))return null;
