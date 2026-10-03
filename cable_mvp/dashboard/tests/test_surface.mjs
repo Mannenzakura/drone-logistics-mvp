@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {simulateFull} from '../static/branch/full_model.mjs';
+import {eventSchedule} from '../static/branch/event_network.mjs';
+import {networkLedger} from '../static/branch/network_economics.mjs';
+import {jointStudy,JOINT_DEFAULTS} from '../static/branch/joint.mjs';
+const o={...JOINT_DEFAULTS,deadline:20,padCount:1,movementChannels:1,chargeSetupMinutes:0},base={...simulateFull({}).p,ac:1,fullCD:1,fullCE:1,fullDB:1,fullEB:1,speed:60,battery:1,energyReserve:0,k0:.02,kLoad:0,loiterRate:.01,handlingEnergyC:0,handlingEnergyD:0,serviceEnabledC:0,sharedC:0,sharedD:0,winchEnabled:0,target:-1,groundStandby:1,departuresC:[4,6,12],departuresCE:[],departuresD:[8,10,16],departuresEB:[],batchMax:10,batchReserve:0,joinBuffer:0};
+const job=(id,due=20)=>({id,origin:'A',branch:'D',destination:'B',created:0,weight:1,dropC:0,loadC:0,loadHub:0,workC:0,workHub:0,cargoType:'普通',feeFactor:1,dispatchDeadline:due});
+const p={...base,fullJobs:[job(0),job(1)]},s=eventSchedule(p,0,0,o);
+assert.equal(s.rows[0].arrivalC,1.5);assert.equal(s.rows[0].departC,4);assert.equal(s.rows[1].departC,6);assert.equal(s.rows[0].arrivalB,9.5);assert.ok(s.rows[1].surfaceHistory[0].reservedAt>s.rows[1].surfaceHistory[0].requested);
+function audit(schedule,input){
+ for(const station of ['C','D','E']){const records=schedule.rows.flatMap(r=>r.surfaceHistory.filter(c=>c.station===station));for(let t=0;t<=o.deadline;t+=.025){assert.ok(records.filter(c=>c.pad!==null&&t>=(c.reservedAt??Infinity)&&t<(c.releasedAt??o.deadline)).length<=o.padCount);assert.ok(records.filter(c=>(t>=(c.landingStart??Infinity)&&t<Math.min(c.landingEnd??o.deadline,c.releasedAt??o.deadline))||(t>=(c.takeoffStart??Infinity)&&t<Math.min(c.takeoffEnd??o.deadline,c.releasedAt??o.deadline))).length<=o.movementChannels);}}
+ for(const r of schedule.rows)for(let t=0;t<=o.deadline;t+=.025){const consumed=r.energySegments.reduce((a,x)=>a+x.energy*(x.end>x.start?Math.max(0,Math.min(1,(t-x.start)/(x.end-x.start))):Number(t>=x.start)),0),stored=r.chargeHistory.reduce((a,c)=>a+(c.storeEnergy??0)*(c.start===null?0:c.finish>c.start?Math.max(0,Math.min(1,(Math.min(t,c.ended??t)-c.start)/(c.finish-c.start))):0),0),soc=input.battery-input.energyReserve-consumed+stored;assert.ok(soc>=-1e-8&&soc<=input.battery-input.energyReserve+1e-8);}
+}
+audit(s,p);
+const cutoff=eventSchedule({...base,fullJobs:[job(0,1.75),job(1)]},0,0,o);assert.equal(cutoff.rows[0].terminatedAt,1.75);assert.equal(cutoff.rows[0].surfaceHistory[0].releasedAt,1.75);assert.equal(cutoff.rows[1].surfaceHistory[0].reservedAt,1.75);assert.ok(cutoff.rows[0].energySegments.every(x=>x.end<=1.75));audit(cutoff,base);
+const zero=eventSchedule(p,0,0,{...o,padCount:0});assert.equal(zero.rows.filter(r=>r.completionTime!==null).length,0);assert.ok(zero.rows.every(r=>r.departC===null));
+const charging={...base,battery:.2,energyPolicy:'charge',chargeSlots:1,chargeStrategy:'next',fullJobs:[job(0)]},charged=eventSchedule(charging,0,0,o);assert.ok(charged.rows[0].chargeHistory.length>0);assert.ok(charged.rows[0].completionTime!==null);audit(charged,charging);
+const empty=eventSchedule({...base,fullJobs:[]},0,0,o),ledger=networkLedger({...base,fullJobs:[]},empty,o);assert.equal(ledger.totals.surfaceInfrastructure,o.deadline*3*(o.padCount*o.padCostPerMinute+o.movementChannels*o.movementCostPerMinute));assert.ok(ledger.net<0);
+assert.deepEqual(s,eventSchedule(p,0,0,o));assert.throws(()=>eventSchedule(p,0,0,{...o,padCount:1.5}));assert.throws(()=>jointStudy(simulateFull({}),{landingEnergy:-1}));
+const r=jointStudy(simulateFull({}),{runs:20,reliability:.5,refine:0,maxDrop:0,maxLoadC:0,maxLoadHub:0}),sets=[r.seeds,r.validationSeeds,r.improvementSeeds,r.connections.freshSeeds,r.connections.charging?.seeds??[],r.connections.charging?.strategySeeds??[],r.surface.freshSeeds];assert.equal(new Set(sets.flat()).size,sets.flat().length);assert.ok(r.surface.alternatives.every(x=>x.result.trials.every(t=>r.surface.freshSeeds.includes(t.seed))));if(r.surface.review)assert.ok(Math.abs(r.surface.review.gain.mean-(r.surface.chosen.result.meanNetworkNet-r.surface.reference.result.meanNetworkNet))<1e-8);
+console.log('PASS finite pads, shared FIFO movement, missed formation, immediate interruption release, vertical SOC, charging interaction, idle costs and seventh independent paired review');

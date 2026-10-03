@@ -3,7 +3,7 @@ import {simulateFull} from '../static/branch/full_model.mjs';
 import {flowSchedule} from '../static/branch/network_flow.mjs';
 import {networkLedger} from '../static/branch/network_economics.mjs';
 import {jointStudy,JOINT_DEFAULTS} from '../static/branch/joint.mjs';
-const plan=simulateFull({}),p=plan.p,o=JOINT_DEFAULTS;
+const plan=simulateFull({}),p=plan.p,o={...JOINT_DEFAULTS,surfaceModel:0};
 const jobs=[{id:0,origin:'A',branch:'D',destination:'B',created:0,weight:1,dropC:0,loadC:0,loadHub:0,workC:0,workHub:0,cargoType:'普通',feeFactor:1,dispatchDeadline:90}];
 const cp={...p,fullJobs:jobs,target:-1,serviceEnabledC:0,departuresC:[17],departuresCE:[],departuresD:[30,35],departuresEB:[],batchMax:3,batchReserve:0};
 const strict=flowSchedule(cp),held=flowSchedule({...cp,connectionHold:2});assert.equal(strict.rows[0].departD,35);assert.ok(held.rows[0].departD>30&&held.rows[0].departD<=32);assert.ok(held.batches.find(b=>b.station==='D→B').connectionDelay>0);
@@ -12,7 +12,7 @@ const capped=flowSchedule({...cp,departuresD:[30,30.5],connectionHold:10});asser
 const empty=networkLedger({...cp,fullJobs:[]},{rows:[],batches:[]},o);assert.equal(empty.net,-o.deadline*o.airportCostPerMinute);
 const ledger=networkLedger(cp,held,o);assert.ok(ledger.completed===1);assert.ok(ledger.totals.energy>0);assert.ok(Math.abs(ledger.net-(ledger.totals.revenue-ledger.totals.timeCost-ledger.totals.handling-ledger.totals.fixed-ledger.totals.electricity-ledger.totals.penalty-ledger.totals.rescue-ledger.totals.equipment-ledger.totals.airport-ledger.totals.leader))<1e-8);
 const low=networkLedger({...cp,battery:.01,energyReserve:0},held,o);assert.equal(low.completed,0);assert.ok(low.tasks[0].depleted);assert.equal(low.totals.revenue,0);
-const r=jointStudy(plan,{runs:20,reliability:.5});assert.equal(r.connections.results.length,36);assert.equal(new Set([...r.seeds,...r.validationSeeds,...r.improvementSeeds,...r.connections.freshSeeds,p.batchSeed]).size,81);
+const r=jointStudy(plan,{surfaceModel:0,runs:20,reliability:.5});assert.equal(r.connections.results.length,36);assert.equal(new Set([...r.seeds,...r.validationSeeds,...r.improvementSeeds,...r.connections.freshSeeds,p.batchSeed]).size,81);
 for(const x of r.connections.results.filter(x=>!x.error)){assert.ok(Number.isFinite(x.meanNet));assert.deepEqual(x.trials.map(t=>t.seed),r.validationSeeds);}
 const review=r.connections.review;assert.ok(review);assert.ok(Math.abs(review.gain.mean-(review.result.meanNet-review.reference.meanNet))<1e-8);assert.deepEqual(review.result.trials.map(t=>t.seed),r.connections.freshSeeds);
 console.log('PASS bounded causal holding, next-batch cap, empty-airport costs, whole-network identity, energy abort, shared exploration and fourth independent seeds');

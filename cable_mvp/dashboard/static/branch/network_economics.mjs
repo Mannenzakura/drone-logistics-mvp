@@ -1,8 +1,8 @@
-import {effectivePayload,winchTimes} from '../four_model.mjs?v=20261003-network22';
+import {effectivePayload,winchTimes} from '../four_model.mjs?v=20261003-network23';
 const fraction=(t,a,b)=>a===null||!Number.isFinite(a)?0:b>a?Math.max(0,Math.min(1,(t-a)/(b-a))):Number(t>=a);
 const gamma=(p,n)=>{const x=(Math.max(1,n??1)-1)/Math.max(1,n??1);return 1-p.chi*p.eta*(p.role===1?x:p.role===2?x*x:0)};
 export function networkLedger(p,s,o){
- const totals={revenue:0,timeCost:0,handling:0,fixed:0,electricity:0,penalty:0,rescue:0,energy:0,gridEnergy:0,chargeCost:0,chargingInfrastructure:0,equipment:0,airport:0,leader:0},tasks=[];
+ const totals={revenue:0,timeCost:0,handling:0,fixed:0,electricity:0,penalty:0,rescue:0,energy:0,gridEnergy:0,chargeCost:0,chargingInfrastructure:0,surfaceInfrastructure:0,maintenance:0,equipment:0,airport:0,leader:0},tasks=[];
  for(const r of s.rows){
   const a=r.origin==='A',atC=r.arrivalC!==null,hub=r.arrivalD!==null,branch=r.branch,cd=branch==='D'?p.fullCD??p.cd:p.fullCE??p.ce,db=branch==='D'?p.fullDB??p.db:p.fullEB??p.eb;
   const q=r.weight,d=r.dropC??0,l=r.loadC??0,h=r.loadHub??0,c={dC:d,lC:l,lHub:h},timing=winchTimes(p,d,l,h),end=r.completionTime;
@@ -30,9 +30,11 @@ export function networkLedger(p,s,o){
   tasks.push({id:r.id,isTarget:r.id===p.target,cargoType:r.cargoType,origin:r.origin,success,invalid,depleted,stop,due,net,undeliveredKg,chargeVisits:charged.visits,terminationReason:r.terminationReason??null,ledger,wait:(atC?Math.max(0,Math.min(stop,r.departC??stop)-r.arrivalC):0)+(hub&&r.destination==='B'?Math.max(0,Math.min(stop,r.departD??stop)-r.arrivalD):0)});
   for(const k of Object.keys(ledger))totals[k]+=ledger[k];
  }
+ totals.surfaceInfrastructure=o.deadline*3*((s.padCount??0)*(o.padCostPerMinute??0)+(s.movementChannels??0)*(o.movementCostPerMinute??0));
  totals.chargingInfrastructure=o.deadline*3*(s.chargeSlots??0)*(o.chargeDeviceCostPerMinute??.01);
  totals.equipment=o.deadline*(p.serviceEnabledC?p.serviceServersC:0)*o.deviceCostPerMinute;totals.airport=o.deadline*o.airportCostPerMinute;
  for(const b of s.batches.filter(b=>!b.cancelled&&b.time<=o.deadline)){const dist=b.station==='C→D'?p.fullCD??p.cd:b.station==='C→E'?p.fullCE??p.ce:b.station==='D→B'?p.fullDB??p.db:p.fullEB??p.eb;const energy=dist*p.k0*gamma(p,b.actualSize)*fraction(o.deadline,b.time,b.time+dist/p.speed*60)+o.groundEnergyRate*b.connectionDelay;totals.leader+=o.leaderDepartureCost+energy*p.energyPrice;}
- const net=totals.revenue-totals.timeCost-totals.handling-totals.fixed-totals.electricity-totals.penalty-totals.rescue-totals.equipment-totals.airport-totals.leader-totals.chargeCost-totals.chargingInfrastructure;
+ totals.maintenance=(o.disruptions??[]).filter(x=>x.type!=='weather'&&x.start<o.deadline).length*(o.faultRepairCost??0);
+ const net=totals.revenue-totals.maintenance-totals.timeCost-totals.handling-totals.fixed-totals.electricity-totals.penalty-totals.rescue-totals.equipment-totals.airport-totals.leader-totals.chargeCost-totals.chargingInfrastructure-totals.surfaceInfrastructure;
  return {net,totals,tasks,completed:tasks.filter(t=>t.success).length,generated:tasks.length,undeliveredKg:tasks.reduce((a,t)=>a+t.undeliveredKg,0),connectionDelay:s.batches.reduce((a,b)=>a+b.connectionDelay,0)};
 }

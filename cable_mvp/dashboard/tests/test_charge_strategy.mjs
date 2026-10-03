@@ -6,7 +6,7 @@ import {networkLedger} from '../static/branch/network_economics.mjs';
 import {jointStudy,JOINT_DEFAULTS} from '../static/branch/joint.mjs';
 const p={...simulateFull({}).p,ac:30,fullCD:10,fullCE:10,fullDB:10,fullEB:10,speed:60,battery:1,energyReserve:0,serviceEnabledC:0,sharedC:0,sharedD:0,target:-1,departuresC:[33,40],departuresCE:[],departuresD:[46,61],departuresEB:[],batchMax:5,batchReserve:0,joinBuffer:0,groundStandby:1,energyPolicy:'charge',chargeSlots:1};
 const job={id:0,origin:'A',branch:'D',destination:'B',created:0,weight:1,dropC:0,loadC:0,loadHub:0,workC:0,workHub:0,cargoType:'普通',feeFactor:1,dispatchDeadline:90};
-const o={...JOINT_DEFAULTS,chargeVisitCost:0},input={...p,fullJobs:[job]},full=eventSchedule(input,0,0,o),next=eventSchedule({...input,chargeStrategy:'next'},0,0,o),remaining=eventSchedule({...input,chargeStrategy:'remaining'},0,0,o);
+const o={...JOINT_DEFAULTS,surfaceModel:0,chargeVisitCost:0},input={...p,fullJobs:[job]},full=eventSchedule(input,0,0,o),next=eventSchedule({...input,chargeStrategy:'next'},0,0,o),remaining=eventSchedule({...input,chargeStrategy:'remaining'},0,0,o);
 assert.equal(full.rows[0].departC,40);assert.equal(next.rows[0].departC,33);assert.equal(next.rows[0].arrivalB,56);assert.equal(full.rows[0].arrivalB,71);assert.equal(remaining.rows[0].arrivalB,71);
 const a=networkLedger(input,full,o),b=networkLedger(input,next,o),c=networkLedger(input,remaining,o);assert.equal(a.completed,1);assert.equal(b.completed,1);assert.equal(c.completed,1);assert.ok(b.net>a.net);assert.ok(c.totals.gridEnergy<a.totals.gridEnergy);
 assert.ok(next.rows[0].chargeHistory[0].storeEnergy<full.rows[0].chargeHistory[0].storeEnergy);assert.equal(remaining.rows[0].chargeHistory.length,1);assert.equal(next.rows[0].chargeHistory.length,2);
