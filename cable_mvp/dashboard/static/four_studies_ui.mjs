@@ -42,7 +42,7 @@ export function runFourStudies(plan){
   current=plan;worker?.terminate();$('fourStudiesStatus').textContent='正在重新计算当前路线分区与跨站排队…';
   for(const id of ['fourWinchMap','fourFormationMap','fourQueueChart','fourFifoRows','fourRiskRows','fourRiskSummary'])$(id).replaceChildren();
   $('fourWinchDetail').textContent='计算中…';$('fourFormationDetail').textContent='计算中…';
-  worker=new Worker(new URL('./four_studies_worker.mjs?v=20261002-network20',import.meta.url),{type:'module'});
+  worker=new Worker(new URL('./four_studies_worker.mjs?v=20261003-network22',import.meta.url),{type:'module'});
   worker.onmessage=({data})=>{if(data.error)$('fourStudiesStatus').textContent=`专题未完成：${data.error}`;else result(data.result);worker?.terminate();worker=null};
   worker.onerror=()=>{$('fourStudiesStatus').textContent='专题计算未能载入，请刷新重试。';worker?.terminate();worker=null};
   worker.postMessage({plan,options:{distanceMax:Number($('studyDistanceMax').value),payloadMax:Number($('studyPayloadMax').value),risks:{

@@ -1,5 +1,5 @@
-import {flowSchedule} from './network_flow.mjs?v=20261002-network20';
-import {winchTimes,cruiseFour,effectivePayload} from '../four_model.mjs?v=20261002-network20';
+import {flowSchedule} from './network_flow.mjs?v=20261003-network22';
+import {winchTimes,cruiseFour,effectivePayload} from '../four_model.mjs?v=20261003-network22';
 const progress=(now,start,end)=>start===null||!Number.isFinite(start)?0:end>start?Math.max(0,Math.min(1,(now-start)/(end-start))):Number(now>=start);
 export function missionLedger(p,c,o,success,e=null){
  const timing=winchTimes(p,c.dC,c.lC,c.lHub),s=e?.schedule??flowSchedule(p,timing.workC,timing.workD),t=s.rows[p.target],zC=Number(c.dC+c.lC>0),zH=Number(c.lC+c.lHub>0),invalid=p.q+Math.max(c.dC,c.lC,c.lHub)>effectivePayload(p)+1e-9||Math.max(c.dC,c.lC,c.lHub)>p.bay+1e-9||(p.winchEnabled&&Math.max(c.dC,c.lC,c.lHub)>p.winchCapacity+1e-9)||(p.sharedC&&(timing.workC>p.airspaceC||zC>p.permitC))||(p.sharedD&&(timing.workD>p.airspaceD||zH>p.permitD));

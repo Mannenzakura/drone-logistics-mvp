@@ -1,4 +1,4 @@
-import {effectivePayload,winchTimes} from '../four_model.mjs?v=20261002-network20';
+import {effectivePayload,winchTimes} from '../four_model.mjs?v=20261003-network22';
 const fraction=(t,a,b)=>a===null||!Number.isFinite(a)?0:b>a?Math.max(0,Math.min(1,(t-a)/(b-a))):Number(t>=a);
 const gamma=(p,n)=>{const x=(Math.max(1,n??1)-1)/Math.max(1,n??1);return 1-p.chi*p.eta*(p.role===1?x:p.role===2?x*x:0)};
 export function networkLedger(p,s,o){

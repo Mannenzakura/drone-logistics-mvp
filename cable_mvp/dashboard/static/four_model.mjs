@@ -1,7 +1,7 @@
-import {flowSchedule} from './branch/network_flow.mjs?v=20261002-network20';
-import {sharedCService} from './shared_service.mjs?v=20261002-network20';
-import {boardFifo} from './network/engine.mjs?v=20261002-network20';
-import {stationTrips,validateBatchCapacity} from './batch_capacity.mjs?v=20261002-network20';
+import {flowSchedule} from './branch/network_flow.mjs?v=20261003-network22';
+import {sharedCService} from './shared_service.mjs?v=20261003-network22';
+import {boardFifo} from './network/engine.mjs?v=20261003-network22';
+import {stationTrips,validateBatchCapacity} from './batch_capacity.mjs?v=20261003-network22';
 
 export const FOUR_DEFAULTS={
   serviceEnabledC:0,serviceServersC:1,capacityMode:0,waitWarning:15,localWarmup:4,localRateC:1.4,localRateD:1.4,localRateE:1.4,batchSeed:20260930,batchMax:10,batchReserve:0,localProbabilityC:0.8,localProbabilityD:0.8,localProbabilityE:0.8,

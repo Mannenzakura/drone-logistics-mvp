@@ -1,13 +1,13 @@
-import {CHARGE_STRATEGIES} from './charge_planner.mjs?v=20261002-network20';
-import {eventSchedule} from './event_network.mjs?v=20261002-network20';
-import {networkLedger} from './network_economics.mjs?v=20261002-network20';
-import {generateDemand} from './random_demand.mjs?v=20261002-network20';
-import {trialSeeds,quantile} from './repeated.mjs?v=20261002-network20';
-import {wilson} from './paired_routes.mjs?v=20261002-network20';
+import {CHARGE_STRATEGIES} from './charge_planner.mjs?v=20261003-network22';
+import {eventSchedule} from './event_network.mjs?v=20261003-network22';
+import {networkLedger} from './network_economics.mjs?v=20261003-network22';
+import {generateDemand} from './random_demand.mjs?v=20261003-network22';
+import {trialSeeds,quantile} from './repeated.mjs?v=20261003-network22';
+import {wilson} from './paired_routes.mjs?v=20261003-network22';
 const mean=x=>x.reduce((a,b)=>a+b,0)/x.length;
 const interval=x=>{const m=mean(x);if(x.length<2)return {mean:m,low:null,high:null};const se=Math.sqrt(x.reduce((a,b)=>a+(b-m)**2,0)/(x.length-1)/x.length);return {mean:m,low:m-1.96*se,high:m+1.96*se}};
 export function connectionStudy(p,mission,candidate,o,exploreSeeds,excluded,buildInput,progress=()=>{}){
- const configs=[];for(const policy of ['strict','ready','deadline'])for(const shift of [...new Set([-o.shiftMinutes,0,o.shiftMinutes])])for(const hold of [...new Set([0,o.maxHold])])for(const extraDevice of [0,1])configs.push({policy,shift,hold,extraDevice});
+ const configs=[];for(const policy of ['strict','ready','deadline'])for(const shift of [...new Set([-o.shiftMinutes,0,o.shiftMinutes])])for(const hold of [...new Set([0,o.maxHold])])for(const extraDevice of [0,1])configs.push({policy,shift,hold,extraDevice,groundStandby:1,chargeSlots:candidate.chargeSlots??0,chargeStrategy:candidate.chargeStrategy==='none'?'full':candidate.chargeStrategy??'full'});
  const freshSeeds=trialSeeds(o.networkSeed,o.runs,excluded),background=exploreSeeds.map(batchSeed=>generateDemand({...p,batchSeed})),fresh=freshSeeds.map(batchSeed=>generateDemand({...p,batchSeed}));
  const assess=(config,seeds,jobs)=>{
   const cp={...p,battery:config.battery??p.battery,groundStandby:config.groundStandby??0,chargeStrategy:config.chargeStrategy??'full',energyPolicy:config.chargeSlots?'charge':'terminate',chargeSlots:config.chargeSlots??0,dispatchPolicy:config.policy,connectionHold:config.hold,serviceEnabledC:config.extraDevice?1:p.serviceEnabledC,serviceServersC:config.extraDevice?(p.serviceEnabledC?p.serviceServersC+1:1):p.serviceServersC,departuresD:p.departuresD.map(t=>t+config.shift),departuresEB:p.departuresEB.map(t=>t+config.shift)};

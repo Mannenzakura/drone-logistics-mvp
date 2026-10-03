@@ -1,4 +1,4 @@
-import {assignService} from '../shared_service.mjs?v=20261002-network20';
+import {assignService} from '../shared_service.mjs?v=20261003-network22';
 export function flowSchedule(p,workC=0,workHub=0,options={}){
  const policy=p.dispatchPolicy??'strict';if(!['strict','ready','deadline'].includes(policy))throw new Error('未知调度规则');
  const ac=p.ac/p.speed*60,dist={D:p.fullCD??p.cd,E:p.fullCE??p.ce},lastDist={D:p.fullDB??p.db,E:p.fullEB??p.eb};

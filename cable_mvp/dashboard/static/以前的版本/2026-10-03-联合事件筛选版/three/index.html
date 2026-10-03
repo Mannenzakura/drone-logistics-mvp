@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>无人机物流编队 · 交互实验室</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="local.css"></head>
+<body>
+<header><div class="brand"><span class="brandmark">↗</span><div><h1>任务控制台</h1><p>A → C → B / 三站历史模板</p></div></div><div class="badge">已保存的三站模板</div><a class="badge" href="../" style="text-decoration:none">← 返回四站主模板</a><a class="badge" href="../network/" style="text-decoration:none">A→C→D→B 延迟传播 →</a><a class="badge" href="../framework/" style="text-decoration:none">导师框架 §11 结果页 →</a></header>
+<main><aside>
+<div class="section-heading"><h2>任务参数</h2><button id="reset" class="quiet">恢复示例</button></div>
+<p class="hint">修改后点击“计算并应用”。速度参考原文，其余默认值为演示假设。</p>
+<form id="form">
+<div class="fields" id="primaryFields"></div>
+<div id="cargoGroups"></div><p class="hint">价格指货运收费，不是商品售价。q 为必运量；D、L 为自动优化的需求上限。d 与 l 先卸后装，共用可拆卸仓。每组可选择不同类型，预设值均可改写。</p>
+<fieldset><legend>C 点卸货区域</legend>
+<label class="check"><input id="sharedAirspace" type="checkbox" checked> 索降装卸占用机场共享空域</label>
+<label class="check"><input id="airspace" type="checkbox" checked> 已获机场共享空域作业窗口</label>
+<p class="hint" id="airspaceHint">占用共享空域：作业须同时满足机场空域窗口与编队衔接时间。</p>
+</fieldset>
+<fieldset><legend>C → B 编队节能</legend><label>本机角色<select id="formationRole"><option value="1">跟随机 follower</option><option value="2">轮换领航（平均）</option><option value="3">固定领航机</option><option value="0">单飞对照</option></select></label><div class="fields" id="formationFields"></div><p class="hint">η、χ 为待标定的情景参数。默认 η=0.10、χ=0.6、m=3 时 χη=0.06，本机跟随巡航节能为 χη(m−1)/m=4%，不是 χη=6%。2026-09-26 的文献页码级核查推翻了原先「χη ∈ [0.10, 0.18]」的标定区间：那些数字几乎都是二次引用的军机/运输机燃油数据，没有一条是 96 kg 级电动垂起固定翼的一手值。不同机型的诱导阻力、燃油或功率结果不能直接标定本机，也不能据此认定短间隔安全。悬停不使用巡航折扣。下方表格给出 χη 扫描。</p></fieldset>
+<details><summary>作业、能源与收益假设</summary><div class="fields" id="advancedFields"></div>
+<label class="check"><input id="allowExtrap" type="checkbox"> 允许航程超出原文 110 km（线性能量外推，结果未经原文验证）</label>
+<p class="hint" id="extrapolationNote" hidden style="color:#8a5a2a">当前方案航程已超过原文 110 km 适用范围：以下结果基于线性外推，仅用于机制探索，不代表实机能力。</p>
+</details>
+<fieldset><legend>装卸决策</legend><div class="mode"><label><input type="radio" name="mode" value="optimal" checked> 自动优化</label><label><input type="radio" name="mode" value="manual"> 手动试验</label></div><div class="fields manual" hidden><label>卸货 d / kg<input id="manualD" type="number" value="5" min="0" step="0.1"></label><label>装货 l / kg<input id="manualL" type="number" value="3" min="0" step="0.1"></label></div></fieldset>
+<button id="apply" class="primary" type="submit">计算并应用方案</button><p id="dirty" class="hint" hidden>参数尚未应用，当前画面仍显示上一次方案。</p>
+</form>
+<details class="source"><summary>数据来源与模型边界</summary><p>丰舟 90：巡航 108 km/h，原始性能点 20 kg / 70 km、10 kg / 110 km。</p><p>参考载荷按原文航程曲线筛选，另扣设备质量；这不能验证改装后的续航。</p><p>示例将完整固定作业时间均分为放仓和收仓；先卸后装的机械流程及时间仍待验证。能量曲线把卸货增量计入 A→C、固定增量计入 C、装货增量计入 C→B，仅作阶段化展示。</p><p>跟随 γ=1−χη(m−1)/m；轮换 γ=1−χη[(m−1)/m]²；领航与单飞 γ=1。χ=1 时对应导师 v2.3。固定巡航能耗、载重系数、电价及η均为情景参数；仅比较本机，不统计整队。</p><p>G 是“不装卸且单飞”的基准余量，已有货物的编队节能增加可用余量。装卸新增收益相对“同样编队但不装卸”，不会再次计入已有货物的节能。对照采用相同路线和等待时长，不能据此判断等待编队本身是否划算。</p><p>经济效益面板把收费、时效损失、电费、索降固定成本和按重量装卸成本合并；直飞 B 是可修改距离与载重能耗的单飞基准。中转方案还服务 C 点货物 d，因此相对直飞差额是网络情景对照，不是严格同货量实验。</p><p>编队有预约位置，队形示意不代替气动或空域验证。提高速度只改变时间，不自动改变能耗系数。</p><a href="https://www.fyuav.cn/uav/fz-90/" target="_blank" rel="noreferrer">丰翼官方参数 ↗</a><a href="https://www.a2zdronedelivery.com/rds2-drone-winch" target="_blank" rel="noreferrer">索降绞盘参考 ↗</a></details>
+</aside>
+<div class="workspace">
+<div id="error" role="alert" hidden></div>
+<div class="summary"><div><span>最优 / 当前卸货</span><strong id="dropValue">—</strong></div><div><span>最优 / 当前装货</span><strong id="loadValue">—</strong></div><div><span>装卸新增净收益</span><strong id="profitValue">—</strong></div><div><span>方案检查</span><strong id="validValue">等待计算</strong></div></div>
+<div class="formation-summary"><div><span>本机 C→B 巡航节能率</span><strong id="savingRate">—</strong><small id="gammaValue">—</small></div><div><span>相同载重：单飞 → 编队</span><strong id="cbComparison">—</strong><small>仅 C→B 巡航，非全任务能耗</small></div><div><span>本机累计编队节能</span><strong id="liveSaving">—</strong><small id="savedTotal">—</small></div></div>
+<section class="panel" id="fifoPanel"><div class="section-heading"><h2>C 点 FIFO 编队衔接算例</h2><button id="runFifo" class="primary" type="button">计算排队与三档节能</button></div>
+<p class="hint">时间以目标飞机到达前的同一时钟计。按到达顺序占用下一班可用位次；目标飞机为到达列表的第 3 架。发车时刻和位次均为演示假设，可直接修改。此处是逐架排程，不是 v2.4 的稳态网络优化。</p>
+<div class="fields"><label>飞机到达 C 的时刻 / min（逗号分隔）<input id="fifoArrivals" type="text" value="0,1,2,5,6"></label><label>编队发车时刻 / min（逗号分隔）<input id="fifoDepartures" type="text" value="4,8,12,16"></label><label>每班可用位次<input id="fifoSeats" type="number" min="1" max="20" step="1" value="2"></label></div>
+<label class="check"><input id="fifoDefer" type="checkbox" checked> 允许目标飞机让出本班位次，比较后续编队的装卸收益和等待成本</label>
+<div id="fifoStatus" class="hint"></div><div class="table-scroll"><table><thead><tr><th>飞机</th><th>到达</th><th>所乘编队</th><th>位次</th><th>实际等待</th></tr></thead><tbody id="fifoRows"></tbody></table></div>
+<div class="table-scroll"><table><thead><tr><th>节能情景 η</th><th>选中编队</th><th>本机 C→B 巡航节能</th><th>最优卸货 d</th><th>最优装货 l</th><th>作业时长</th><th>装卸增量净收益</th><th>等待耗能</th><th>计入等待电费后中转净收益</th></tr></thead><tbody id="fifoScenarios"></tbody></table></div>
+<p class="hint">仅目标飞机重新求解 d、l；其他飞机只占位，不计其货量。目标飞机主动让出位次时移到队尾，后续班次重新按 FIFO 分配。等待盘旋能耗率暂按巡航固定项 × 速度估算，并从新增能量余量中扣除；这不是实测悬停/盘旋功率。班次选择比较的是当前货运范围下的中转净收益，不代表与直飞同货量的严格对照。近似平均等待仅用于与本排程对照。η 取 5%、10%、15% 的演示扫描，实际巡航节能还取决于 χ、角色与编队规模。</p></section>
+<div class="economics"><div><span>货物口径</span><strong id="cargoLabelValue">—</strong></div><div><span>中转方案净经济效益</span><strong id="transferNet">—</strong><small id="transferBreakdown">收费 − 时效损失 − 综合运行成本</small></div><div><span>直飞 B 单飞基准</span><strong id="directNet">—</strong><small id="directBreakdown">自动选择可行的 B 货量</small></div><div><span>中转相对直飞</span><strong id="deltaDirect">—</strong><small>正值表示当前方案更高</small></div></div>
+<section class="panel"><h2>分货物收入与成本</h2><div style="overflow-x:auto"><table style="width:100%;font-size:12px;text-align:left;line-height:2"><thead><tr><th>货舱 / 路线</th><th>类型</th><th>实际货量 kg</th><th>收费/公斤</th><th>货运收入</th><th>时效损失</th><th>处理成本</th></tr></thead><tbody id="cargoRows"></tbody></table></div><p class="hint">直飞只运同一批 A→B 的 q；中转额外服务 d、l，差额包含服务范围差异。金额为所列成本下的估算；未计独立悬停功率与维护折旧。</p></section>
+<section class="stage-panel"><div class="section-heading"><div><span class="eyebrow">MISSION VIEW</span><h2 id="phase" aria-live="polite">准备出发</h2></div><span class="clock" id="clock">00:00 / 00:00</span></div>
+<svg id="scene" viewBox="0 0 960 390" role="img" aria-label="无人机沿 A 到 C 再到 B 飞行的示意轨迹">
+<defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#dce7e3" stroke-width=".7"/></pattern><g id="plane"><path d="M23 0L-15 -6L-11 0L-15 6Z M0 0L-9 -20L-14 -20L-8 0L-14 20L-9 20Z" fill="currentColor"/><circle cx="-10" cy="-11" r="4" fill="none" stroke="currentColor"/><circle cx="-10" cy="11" r="4" fill="none" stroke="currentColor"/></g></defs>
+<rect width="960" height="390" fill="url(#grid)"/>
+<ellipse id="operationZone" cx="480" cy="175" rx="85" ry="83" fill="#e0f0e9" opacity=".7"/><text id="zoneLabel" x="480" y="75" text-anchor="middle" class="map-small">C 点共享空域作业区</text>
+<path id="route" d="M110 285 L480 165 L850 285" fill="none" stroke="#b3c8bf" stroke-width="3" stroke-dasharray="7 8"/>
+<path id="trail" d="" fill="none" stroke="#16735e" stroke-width="4"/>
+<g class="station"><circle cx="110" cy="285" r="11"/><text x="110" y="325">A · 始发点</text><circle cx="480" cy="165" r="11"/><text x="480" y="305">C · 中转点</text><circle cx="850" cy="285" r="11"/><text x="850" y="325">B · 目的地</text></g>
+<text id="labelAC" x="260" y="195" class="route-label">30 km</text><text id="labelCB" x="675" y="195" class="route-label">40 km</text>
+<g id="formation" style="display:none" color="#80988e"><use href="#plane" id="mate1"/><use href="#plane" id="mate2"/></g>
+<g id="cargo" style="display:none"><line id="cable" stroke="#8b7755" stroke-width="2"/><rect id="box" width="20" height="16" rx="3" fill="#c99345"/><text id="cargoLabel" x="520" y="260" class="map-small">可拆卸仓</text></g>
+<g id="drone" color="#12674f"><circle r="28" fill="#16735e" opacity=".1"/><use href="#plane"/></g>
+<g id="fifoOverlay" style="display:none"><rect x="552" y="18" width="382" height="137" rx="13" fill="#f5faf6" stroke="#b8cfbf"/><text id="fifoClock" x="568" y="42" class="map-small">C 点排队</text><text id="fifoQueueLabel" x="568" y="62" class="map-small">等待中的飞机</text><g id="fifoPlanes"></g></g>
+<text x="24" y="365" class="map-small">位置与队形为示意；航程以参数值计算，不代表实际地理坐标。</text>
+</svg>
+<div class="telemetry"><div><span>任务货物</span><b id="mass">—</b></div><div><span>巡航速度</span><b id="speed">—</b></div><div><span>累计航程</span><b id="distance">—</b></div><div><span>累计新增耗能</span><b id="energy">—</b></div></div>
+<div class="transport"><button id="play" class="primary" disabled>▶ 播放</button><button id="restart" disabled>回到起点</button><label class="speed-control">播放速度<select id="rate"><option value="10">10×</option><option value="60" selected>60×</option><option value="180">180×</option><option value="600">600×</option></select></label><button id="next" disabled>下一阶段 →</button></div>
+<label class="sr-only" for="seek">仿真时间轴</label><input type="range" id="seek" min="0" max="1000" value="0" disabled><div id="phases" class="phases"></div>
+</section>
+<section class="lower-grid"><div class="panel"><div class="section-heading"><h2>随时间变化</h2><button id="export" class="quiet" disabled>导出 CSV ↓</button></div><svg id="massChart" role="img" aria-label="任务货物载重随时间变化"></svg><p class="hint">能耗对照：实线＝当前角色，虚线＝相同装卸量单飞；均为装卸新增能耗。</p><svg id="energyChart" role="img" aria-label="累计新增能耗与同载荷单飞对照"></svg></div><div class="panel"><h2>约束检查</h2><p class="hint">检查整段任务的计划值，非当前瞬时值。</p><div id="checks"></div></div></section>
+<section class="panel" id="regionPanel"><div class="section-heading"><h2>编队 vs 单飞：距离 × 载重分区</h2></div>
+<div class="fields" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));display:grid;gap:8px">
+<label>指定载重 m* / kg<input id="r_guide_payload" type="number" value="10" min="0" max="35" step="0.5"></label>
+<label>编队总架数 m<input id="r_formation_size" type="number" value="3" min="1" max="8" step="1"></label>
+<label>本机角色<select id="r_role"><option value="1">跟随机 follower</option><option value="2">轮换领航（平均）</option><option value="3">固定领航机</option><option value="0">单飞对照</option></select></label>
+<label>减阻参数 η<input id="r_eta" type="number" value="0.1" min="0" max="1" step="0.01"></label>
+<label>气动能耗占比 χ<input id="r_chi" type="number" value="0.6" min="0" max="1" step="0.01"></label>
+<label>电价 / 单位·kWh⁻¹<input id="r_energy_price" type="number" value="1" min="0" step="0.1"></label>
+<label>时效价值 / 单位·kg⁻¹·min⁻¹<input id="r_time_value" type="number" value="0.015" min="0" step="0.001"></label>
+<label>等待+入队 delay / min<input id="r_delay" type="number" value="6.5" min="0" step="0.5"></label>
+<label>编队协调固定成本 / 单位<input id="r_coordination_cost" type="number" value="0" min="0" step="0.5"></label>
+<label>距离上限 / km<input id="r_distance_max" type="number" value="140" min="20" max="200" step="5"></label>
+<label>巡航速度 / km·h⁻¹<input id="r_speed" type="number" value="108" min="1" step="1"></label>
+<label>等待按固定翼盘旋计能<select id="r_loiter"><option value="1">计入（k0×速度）</option><option value="0">不计等待电量（仍计时效）</option></select></label>
+</div>
+<div class="fields"><label>巡航固定项 k0 / kWh·km⁻¹<input id="r_k0" type="number" value="0.025" min="0.001" step="0.001"></label><label>净货物结构上限 / kg<input id="r_payload_limit" type="number" value="20" min="0" step="0.5"></label><label>范围口径<select id="r_extrapolation"><option value="0">两者均限制在 110 km 内</option><option value="1">允许两者能量模型外推（假设）</option></select></label></div>
+<p class="hint" id="regionStatus"></p>
+<p class="hint" id="regionGuide" style="font-size:14px;color:#37554a">等待计算。</p>
+<canvas id="regionCanvas" style="width:100%;height:280px" role="img" aria-label="编队与单飞在不同距离与载重下的可达性与经济性分区图"></canvas>
+<p class="hint" id="regionNote">等待计算。</p>
+<p class="hint" id="regionMarker"></p>
+<p class="hint" id="regionHover" style="min-height:1.4em;font-size:14px;color:#8a5a2a"></p>
+<div class="summary" id="regionSummary"></div>
+<p class="hint">χη 灵敏度扫描（2026-09-26 文献核查后）：χη 是情景参数，不是本机标定值。</p>
+<div class="table-scroll"><table><thead><tr><th>χη</th><th>γ</th><th>跟随巡航节能</th><th>编队边界 / km</th><th>比单飞多飞 / km</th></tr></thead><tbody id="chiEtaTable"></tbody></table></div>
+<p class="hint" id="chiEtaNote"></p>
+<p class="hint">独立单航段情景：同一路线、同一载重，收益相同，只比较成本与电量。盘旋耗能同时扣减编队可用电量并计入成本；净货物结构上限独立检查。两点能量拟合只复现两个参考点，不等于原论文全段曲线。默认双方都限制在 110 km 内，允许外推后必须重新验证实机性能。此图不是地理地图，也不保证前方领航机能完成同一条超程航段。</p></section>
+
+<section class="panel" id="winchPanel"><div class="section-heading"><h2>索降作业三段计时：可卸 / 可换 / 盈利分区</h2></div>
+<p class="hint">把 C 点作业拆成「接近＋机型转换 → 投送 T_drop(d,h) → 地面换货 T_exchange(d,l) → 取货 T_pickup(l,h) → 退出」。投送的高度律只由公开图表的 (2 kg, 20 m)=41 s 与 (2 kg, 30 m)=62 s 两点定出；取货、地面换货、接近与退出时间都没有公开数据，是情景假设。绞盘 5 kg 上限、绞盘主体与释放钩 1.764 kg 取自公开规格页，不代表本机已获改装许可。</p>
+<div class="fields" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));display:grid;gap:8px">
+<label>固定 A→B 货物 q / kg<input id="w_q" type="number" value="10" min="0" step="0.5"></label>
+<label>索降作业高度 h / m<input id="w_height" type="number" value="20" min="0" step="1"></label>
+<label>绞盘投送/收回上限 / kg<input id="w_winch" type="number" value="5" min="0" step="0.5"></label>
+<label>绞盘＋释放钩质量 / kg<input id="w_hardware" type="number" value="1.764" min="0" step="0.001"></label>
+<label>新增仓体与安装件质量 / kg<input id="w_box" type="number" value="0" min="0" step="0.1"></label>
+<label>可用作业窗口 W / min<input id="w_window" type="number" value="6" min="0" step="0.5"></label>
+<label>地面换货固定时间 / min<input id="w_ex_fixed" type="number" value="0" min="0" step="0.1"></label>
+<label>地面换货每 kg 时间 / min·kg⁻¹<input id="w_ex_kg" type="number" value="0" min="0" step="0.05"></label>
+<label>接近＋机型转换 / min<input id="w_approach" type="number" value="0" min="0" step="0.1"></label>
+<label>退出 / min<input id="w_exit" type="number" value="0" min="0" step="0.1"></label>
+<label>卸货每 kg 净贡献 c_d<input id="w_cd" type="number" value="4" min="0" step="0.5"></label>
+<label>装货每 kg 净贡献 c_l<input id="w_cl" type="number" value="3" min="0" step="0.5"></label>
+<label>一次作业固定成本 F<input id="w_F" type="number" value="5" min="0" step="0.5"></label>
+<label>装卸新增可用电量 G / kWh<input id="w_G" type="number" value="0.65" min="0" step="0.05"></label>
+<label>一次作业固定耗能 e₀ / kWh<input id="w_e0" type="number" value="0.1" min="0" step="0.01"></label>
+<label>卸货增量耗能 e_d / kWh·kg⁻¹<input id="w_ed" type="number" value="0.04" min="0" step="0.005"></label>
+<label>装货增量耗能 e_l / kWh·kg⁻¹<input id="w_el" type="number" value="0.08" min="0" step="0.005"></label>
+<label>是否占用机场共享空域<select id="w_shared"><option value="1">占用（同时受 H 限制）</option><option value="0">机场外独立卸货区</option></select></label>
+<label>共享空域窗口 H / min<input id="w_window_h" type="number" value="6" min="0" step="0.5"></label>
+</div>
+<div class="fields">
+<label>横轴<select id="w_xaxis">
+<option value="window">可用作业窗口 W_cap / min</option><option value="height">索降作业高度 h / m</option>
+<option value="equipment_mass">新增仓体与安装件质量 / kg</option><option value="exchange_per_kg">地面换货每 kg 时间 / min·kg⁻¹</option>
+<option value="exchange_fixed">地面换货固定时间 / min</option><option value="energy">装卸新增可用电量 G / kWh</option>
+<option value="cd">卸货每 kg 净贡献 c_d</option><option value="cl">装货每 kg 净贡献 c_l</option>
+<option value="q">固定 A→B 货物 q / kg</option><option value="demand">两方向需求上限 D=L / kg</option>
+<option value="winch">绞盘上限 / kg</option></select></label>
+<label>纵轴<select id="w_yaxis">
+<option value="height">索降作业高度 h / m</option><option value="window">可用作业窗口 W_cap / min</option>
+<option value="equipment_mass">新增仓体与安装件质量 / kg</option><option value="exchange_per_kg">地面换货每 kg 时间 / min·kg⁻¹</option>
+<option value="exchange_fixed">地面换货固定时间 / min</option><option value="energy">装卸新增可用电量 G / kWh</option>
+<option value="cd">卸货每 kg 净贡献 c_d</option><option value="cl">装货每 kg 净贡献 c_l</option>
+<option value="q">固定 A→B 货物 q / kg</option><option value="demand">两方向需求上限 D=L / kg</option>
+<option value="winch">绞盘上限 / kg</option></select></label>
+</div>
+<p class="hint" id="winchStatus"></p>
+<canvas id="winchCanvas" style="width:100%;height:310px" role="img" aria-label="索降作业可卸、可换、盈利分区图"></canvas>
+<p class="hint" id="winchHover" style="min-height:1.4em;font-size:14px;color:#8a5a2a">把鼠标移到图上，这里显示所指格子的最优决策与净收益。</p>
+<p class="hint" id="winchGuide">等待计算。</p>
+<div class="summary" id="winchSummary"></div>
+<p class="hint" id="winchThresholds" style="font-size:14px;color:#37554a"></p>
+<p class="hint" id="winchNote">等待计算。</p></section>
+
+<section class="panel" id="timingPanel"><div class="section-heading"><h2>时间片原型：编队同步与等待</h2></div>
+<p class="hint">在各片起点就绪的需求，可以本片单飞、编队或结转下一片。比较全单飞（等待同样计费）、编队免费等待的乐观下界、编队计费等待。输出是所列成本节省，不是纯能耗节省。每片起降能力、全网航迹和电池续航尚未在此调度原型中验证。</p>
+<div class="fields" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));display:grid;gap:8px">
+<label>各片就绪架数（逗号分隔）<input id="t_demand" type="text" value="3,5,8,10,9,6,4"></label>
+<label>片长 / min<input id="t_slice" type="number" value="60" min="5" step="5"></label>
+<label>航程 / km<input id="t_distance" type="number" value="70" min="1" step="1"></label>
+<label>载重 / kg<input id="t_payload" type="number" value="10" min="0" step="0.5"></label>
+<label>最大编队 m̄<input id="t_cap" type="number" value="8" min="1" max="8" step="1"></label>
+<label>γ（follower 能耗系数）<input id="t_gamma" type="number" value="0.96" min="0.01" max="1" step="0.01"></label>
+<label>队内间距 δ / km<input id="t_delta" type="number" value="0.5" min="0.01" step="0.1"></label>
+<label>单机占用 D / km<input id="t_D" type="number" value="3" min="0.1" step="0.1"></label>
+<label>每片容量 / km·走廊<input id="t_capacity" type="number" value="40" min="1" step="1"></label>
+<label>时效价值 / 单位·kg⁻¹·min⁻¹<input id="t_time_value" type="number" value="0.015" min="0" step="0.001"></label>
+<label>电价 / 单位·kWh⁻¹<input id="t_energy_price" type="number" value="1" min="0" step="0.1"></label>
+<label>等待计费<select id="t_loiter"><option value="1">时效+盘旋</option><option value="0">仅时效</option></select></label>
+<label>允许跨片等待<select id="t_allow_wait"><option value="1">允许</option><option value="0">禁止</option></select></label>
+<label>每架可用电池 / kWh<input id="t_battery" type="number" value="0" min="0" step="0.5"></label>
+<label>累计空中时长上限 / min<input id="t_airborne" type="number" value="0" min="0" step="10"></label>
+<label>每架最多等几片<input id="t_waitcap" type="number" value="0" min="0" max="48" step="1"></label>
+<label>每片机场服务能力 / 架<input id="t_service" type="number" value="0" min="0" step="1"></label>
+</div>
+<div class="fields"><label>每支编队协调费 / 单位<input id="t_coord" type="number" value="0" min="0" step="0.1"></label><label>巡航速度 / km·h⁻¹<input id="t_speed" type="number" value="108" min="1" step="1"></label><label>巡航固定项 k0 / kWh·km⁻¹<input id="t_k0" type="number" value="0.025" min="0.001" step="0.001"></label></div><button id="timingApply" class="primary">计算时间片方案</button> <button id="timingExport" disabled>导出完整调度 JSON</button><p class="hint">支持 1–48 片、总计至多 240 架次；修改后点击计算。容量是每片等效通行占用预算，不是机场真实服务率。<b>逐机资源约束</b>（电池、累计空中时长、每架最多等几片、每片服务能力）填 0 表示本情景不施加该约束；程序会用 FIFO 队列独立复核实际最长等待，并给出「加与不加这些上限」的同题对照。</p>
+<p class="hint" id="timingStatus"></p>
+<div class="summary" id="timingSummary"></div>
+<p class="hint" id="timingResources" style="font-size:14px;color:#37554a"></p>
+<p class="hint" id="timingBars" style="font-size:13px;line-height:1.9"></p>
+<p class="hint" id="timingPlan"></p>
+<div class="table-scroll"><table><thead><tr><th>时间片</th><th>新到</th><th>上片结转</th><th>单飞架数</th><th>编队规模</th><th>起飞架数</th><th>留待下片</th><th>占用预算</th><th>成本</th></tr></thead><tbody id="timingRows"></tbody></table></div><p class="hint">单走廊、同质载重；一架领航按全额巡航能耗计，其余跟随机使用输入 γ（暂固定、不随组规模变化）。盘旋按 k0×速度/60 的假设率计费，尚未实施逐机电池与等待时长上限；因此可行调度不等于可执行飞行。Python 参考实现和完整公式见下载包。</p></section>
+
+<p class="footnote">研究原型 · 未标定参数仅用于机制试验。货物曲线表示装卸进度，不等同于吊索受力；新增耗能不等同于整机电池消耗。</p>
+</div></main><noscript>请启用 JavaScript 以运行交互仿真。<a href="/log" target="_top">返回航行日志</a></noscript><script type="module" src="app.js?v=20260929-fifo2"></script></body></html>

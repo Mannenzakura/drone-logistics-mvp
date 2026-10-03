@@ -1,5 +1,5 @@
-import {simulateBranch} from './model.mjs?v=20261002-network20';
-import {repeatBranch,trialSeeds} from './repeated.mjs?v=20261002-network20';
+import {simulateBranch} from './model.mjs?v=20261003-network22';
+import {repeatBranch,trialSeeds} from './repeated.mjs?v=20261003-network22';
 export function wilson(success,total){if(!total)return {low:null,high:null};const z=1.96,p=success/total,den=1+z*z/total,center=(p+z*z/(2*total))/den,half=z*Math.sqrt(p*(1-p)/total+z*z/(4*total*total))/den;return {low:Math.max(0,center-half),high:Math.min(1,center+half)};}
 export function pairedMean(v){if(!v.length)return {n:0,mean:null,low:null,high:null};const avg=v.reduce((a,b)=>a+b,0)/v.length;if(v.length<2||v.every(x=>x===v[0]))return {n:v.length,mean:avg,low:null,high:null};const variance=v.reduce((s,x)=>s+(x-avg)**2,0)/(v.length-1),half=1.96*Math.sqrt(variance/v.length);return {n:v.length,mean:avg,low:avg-half,high:avg+half};}
 export function comparePaired(d,e){

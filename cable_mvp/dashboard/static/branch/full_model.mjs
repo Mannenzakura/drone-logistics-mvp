@@ -1,7 +1,7 @@
-import {BRANCH_DEFAULTS} from './model.mjs?v=20261002-network20';
-import {validateFour,evaluateFour,cruiseFour,effectivePayload,winchTimes} from '../four_model.mjs?v=20261002-network20';
-import {RANDOM_DEFAULTS,generateDemand,validateSources} from './random_demand.mjs?v=20261002-network20';
-import {flowSchedule} from './network_flow.mjs?v=20261002-network20';
+import {BRANCH_DEFAULTS} from './model.mjs?v=20261003-network22';
+import {validateFour,evaluateFour,cruiseFour,effectivePayload,winchTimes} from '../four_model.mjs?v=20261003-network22';
+import {RANDOM_DEFAULTS,generateDemand,validateSources} from './random_demand.mjs?v=20261003-network22';
+import {flowSchedule} from './network_flow.mjs?v=20261003-network22';
 export function deliveredCargo(r,time,p){const rates=winchTimes(p,r.dropC,r.loadC,r.loadHub),drop=p.winchTiming?rates.drop:p.tDropC,hubDrop=p.winchTiming?rates.drop:p.tDropD;let kg=0;if(r.completionTime!==null&&r.completionTime<=time)kg+=r.weight+r.loadHub;if(r.arrivalC!==null&&r.serviceStartC!==null&&time>=r.serviceStartC+(p.winchTiming?p.approachC:p.t0C)+drop*r.dropC)kg+=r.dropC;if(r.arrivalD!==null&&time>=r.serviceStartHub+(p.winchTiming?p.approachD:p.t0D)+hubDrop*r.loadC)kg+=r.loadC;return kg;}
 
 export function simulateFull(input){
