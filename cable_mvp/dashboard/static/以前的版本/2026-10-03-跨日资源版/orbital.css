@@ -1,0 +1,41 @@
+/* Scoped inside the simulator frame; the rest of the website is unaffected. */
+:root{color-scheme:dark;color:#d8e7f1;background:#080f17;font-family:"Microsoft YaHei",system-ui,sans-serif}
+body{background:#080f17;margin:0}
+header{background:#0d1722;border-color:#2a4053;padding:20px 24px}
+header p,.hint,.footnote,.source p{color:#98b1c4}
+.brandmark{background:#19394d;color:#94ddff;border-radius:4px}
+.badge{color:#a7d9ec;border-color:#31516a;background:#142534}
+main{padding:18px;gap:18px;grid-template-columns:280px minmax(0,1fr)}
+aside,.panel,.stage-panel,.summary>div{background:#0e1925;border-color:#293e50;border-radius:8px}
+aside{padding:18px}.summary>div{padding:14px}
+label,legend,summary,h1,h2{color:#d0e1ed}
+.fields{gap:12px 8px}
+input[type=number],select{color:#e1eff9;background:#08121d;border-color:#385168;min-height:40px}
+input:disabled{color:#687e90;background:#121c26}
+button{background:#152738;color:#c9e0ef;border-color:#375268;min-height:38px}
+button:hover{background:#213a4d}.primary{background:#88cce8;color:#081723;border-color:#88cce8}.primary:hover{background:#b0e3f6}
+.quiet{color:#98d6f2;background:transparent}.quiet:hover{background:#183044}
+input[type=checkbox],input[type=radio],#seek{accent-color:#8bceeb}
+details{border-color:#293e50}.source a{color:#9bd8f7}
+.summary span,.telemetry span,.formation-summary span,.formation-summary small,.economics span,.economics small{color:#a3bccc}
+.summary strong{font-size:19px;white-space:normal;overflow-wrap:anywhere}
+.formation-summary{background:#102a38;border-color:#315164;border-radius:8px;gap:14px}
+.economics{background:#202932;border-color:#465260;border-radius:8px;gap:14px}
+.formation-summary strong,.economics strong{font-size:17px;color:#ecf5fa}
+.telemetry{border-color:#2b4153}.telemetry b{color:#e0f3fc}
+.clock,.eyebrow{color:#9bbacb}.good{color:#92dec4}.bad{color:#ffb19e}
+#error{background:#392725;color:#ffd1c6;border:1px solid #8b554b;margin:0 0 16px}
+#scene{background:#0a1722}
+#grid path{stroke:#355268}.station circle{fill:#10283a;stroke:#9cc8df}.station text{fill:#d0e7f4}
+.map-small,.route-label{fill:#a6c4d6}#operationZone{opacity:.14}
+#route{stroke:#617e91}#trail{stroke:#91cfea}#drone{color:#b3e6fd}#formation{color:#7199b4}
+.transport{padding:14px 18px 8px}.phases{padding:0 18px 18px}
+.phases button{background:#172b3b;color:#abc7d9}.phases button.active{background:#93cce4;color:#091b29}
+.chart-label{fill:#a3bece}.chart-line{stroke:#91d3e6}.chart-energy{stroke:#e8bc7e}
+.panel svg line:not(.chart-guide){stroke:#2c4050}.chart-guide{stroke:#7e9cab}
+.track{background:#1c3041}.track>div{background:#78b0c1}.bad .track>div{background:#d9957f}
+table{border-collapse:collapse}th,td{padding:9px 10px;border-bottom:1px solid #2a4050;white-space:nowrap}th{color:#9dbfd2;font-weight:500}
+.workspace>.panel{margin-bottom:18px}
+@media(max-width:1150px){main{grid-template-columns:260px minmax(0,1fr)}.formation-summary,.economics{grid-template-columns:1fr}.lower-grid{grid-template-columns:1fr}}
+@media(max-width:760px){header{padding:16px;align-items:flex-start}.badge{white-space:normal}main{padding:12px;display:flex;flex-direction:column}aside{order:0}.workspace{order:1;width:100%}.summary{grid-template-columns:1fr 1fr;gap:8px}.summary strong{font-size:17px}#scene{min-height:0}.telemetry{padding:12px}.formation-summary,.economics{padding:14px}.fields{grid-template-columns:repeat(2,minmax(0,1fr))}th,td{padding:8px}.transport{gap:8px}.constraint-head{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}

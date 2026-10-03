@@ -1,4 +1,4 @@
-import {renderEventComparison} from './event_view.mjs?v=20261003-network25';
+import {renderEventComparison} from './event_view.mjs?v=20261003-network26';
 const fmt=x=>x===null?'—':Number(x).toFixed(2),pct=x=>(100*x).toFixed(1)+'%';
 export function renderSurfaceStudy(el,s){
  el.replaceChildren();if(!s){el.textContent='起降设施模型关闭。';return}

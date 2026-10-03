@@ -1,6 +1,6 @@
-import {assessEvent,pairedInterval} from './joint_event_assess.mjs?v=20261003-network25';
-import {generateDemand} from './random_demand.mjs?v=20261003-network25';
-import {trialSeeds} from './repeated.mjs?v=20261003-network25';
+import {assessEvent,pairedInterval} from './joint_event_assess.mjs?v=20261003-network26';
+import {generateDemand} from './random_demand.mjs?v=20261003-network26';
+import {trialSeeds} from './repeated.mjs?v=20261003-network26';
 export function surfaceStudy(p,mission,c,o,exploreSeeds,excluded,buildInput,progress=()=>{}){
  if(!o.surfaceModel)return null;
  const configs=[{name:'当前起降设施',pads:o.padCount,channels:o.movementChannels},...(o.padCount<20?[{name:'每站增加1个停机位',pads:o.padCount+1,channels:o.movementChannels}]:[]),...(o.movementChannels<10?[{name:'每站增加1条起降通道',pads:o.padCount,channels:o.movementChannels+1}]:[]),...(o.padCount<20&&o.movementChannels<10?[{name:'每站各增加1位与1通道',pads:o.padCount+1,channels:o.movementChannels+1}]:[])];

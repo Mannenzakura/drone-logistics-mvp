@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {simulateFull} from '../static/branch/full_model.mjs';
+import {eventSchedule} from '../static/branch/event_network.mjs';
+import {networkLedger} from '../static/branch/network_economics.mjs';
+import {JOINT_DEFAULTS} from '../static/branch/joint.mjs';
+import {runUnified,prepareDay,simulateUnifiedDay,UNIFIED_DEFAULTS,RESOURCE_PACKAGES,publicTimetable} from '../static/branch/unified.mjs';
+const base={...simulateFull({}).p,ac:1,fullCD:1,fullCE:2,fullDB:1,fullEB:1,speed:60,battery:10,energyReserve:0,k0:.02,kLoad:0,loiterRate:.001,handlingEnergyC:0,handlingEnergyD:0,serviceEnabledC:0,sharedC:0,sharedD:0,winchEnabled:0,target:-1,groundStandby:0,departuresC:[4,5,6,7,8],departuresCE:[4,5,6,7,8],departuresD:[10,11,12],departuresEB:[10,11,12],batchMax:10,batchReserve:0,joinBuffer:0};
+const job={id:0,origin:'A',branch:'D',destination:'B',created:0,weight:1,dropC:.5,loadC:.5,loadHub:.5,workC:0,workHub:0,cargoType:'普通',feeFactor:1,dispatchDeadline:30};
+const o={...JOINT_DEFAULTS,deadline:30,surfaceModel:0},p={...base,onlineMode:'all',fullJobs:[job]},a=eventSchedule(p,0,0,o),b=eventSchedule({...p,fullJobs:[job,{...job,id:1,created:20,weight:5,branch:'E'}]},0,0,o);
+assert.deepEqual(a.rows[0].onlineDecision,b.rows[0].onlineDecision);assert.equal(a.rows[0].onlineDecision.observedCount,0);assert.ok(a.rows[0].dropC<=job.dropC&&a.rows[0].loadC<=job.loadC&&a.rows[0].loadHub<=job.loadHub);
+const demand=eventSchedule({...base,departurePolicy:'demand',departureThreshold:3,departureMaxWait:4,departureMinGap:1,fullJobs:[{...job,dropC:0,loadC:0,loadHub:0}]},0,0,o);assert.equal(demand.rows[0].departC,5);assert.equal(demand.batches.some(b=>!b.cancelled&&!b.flights.length),false);
+const plain=eventSchedule({...base,fullJobs:[{...job,dropC:0,loadC:0,loadHub:0}]},0,0,o);assert.equal(plain.rows[0].departC,4);
+assert.ok(publicTimetable(5,10,'periodic').length<publicTimetable(5,10,'fixed').length);assert.ok(publicTimetable(5,10,'demand').every((t,i)=>t===10+i));
+const queue=eventSchedule({...base,serviceEnabledC:1,serviceServersC:1,fullJobs:[{...job,workC:10},{...job,id:1,dispatchDeadline:2}]},0,0,o),account=networkLedger(base,queue,o);assert.equal(account.tasks[1].ledger.fixed,0);
+const depleted=eventSchedule({...base,battery:.0001,fullJobs:[job]},0,0,o),electric=networkLedger({...base,battery:.0001},depleted,o);assert.equal(electric.tasks[0].ledger.rescue,o.rescueCost);
+const plan=simulateFull({}),snapshot=JSON.stringify(plan),r=runUnified(plan,{runs:2,weatherRate:0,faultRate:0});assert.equal(JSON.stringify(plan),snapshot);assert.equal(r.tagged.length,6);assert.equal(r.policies.length,3);assert.equal(r.exploration.length,60);assert.equal(new Set([...r.seeds,...r.reviewSeeds]).size,4);assert.deepEqual(r.review.trials.map(t=>t.net),r.stress.trials.map(t=>t.net));assert.ok(Math.abs(r.gain.mean-(r.review.meanNet-r.reference.meanNet))<1e-8);assert.ok(r.review.trials.every(t=>Math.abs(t.audit.netResidual)<1e-8&&t.audit.uniqueIds===t.audit.taskCount&&t.totals.penalty===t.audit.expectedPenalty));assert.equal(r.reference.trials[0].schedule.rows.length,r.review.trials[0].schedule.rows.length);if(!r.choice)assert.equal(r.recommended,false);
+console.log('PASS shared chronological ledger, tagged six choices, causal fleet choices unaffected by future jobs, bounded cargo opportunities, demand max-wait/no empty departures, periodic timetable, unstarted fixed-fee guard, electric rescue cost, 60 configurations and fresh paired holdout');

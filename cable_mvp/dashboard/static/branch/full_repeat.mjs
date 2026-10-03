@@ -1,5 +1,5 @@
-import {simulateFull} from './full_model.mjs?v=20261003-network25';
-import {trialSeeds,quantile,proportionCI} from './repeated.mjs?v=20261003-network25';
+import {simulateFull} from './full_model.mjs?v=20261003-network26';
+import {trialSeeds,quantile,proportionCI} from './repeated.mjs?v=20261003-network26';
 export function repeatFull(plan,{runs=100,seed=24,longWait=15}={},progress=()=>{}){
  const seeds=trialSeeds(seed,runs);if(!Number.isFinite(longWait)||longWait<0)throw new Error('长等待阈值须为非负数');
  const trials=[],groups={};let generated=0,completed=0,kg=0;
