@@ -1,9 +1,9 @@
-import {CHARGE_STRATEGIES} from './charge_planner.mjs?v=20261003-network23';
-import {eventSchedule} from './event_network.mjs?v=20261003-network23';
-import {networkLedger} from './network_economics.mjs?v=20261003-network23';
-import {generateDemand} from './random_demand.mjs?v=20261003-network23';
-import {trialSeeds,quantile} from './repeated.mjs?v=20261003-network23';
-import {wilson} from './paired_routes.mjs?v=20261003-network23';
+import {CHARGE_STRATEGIES} from './charge_planner.mjs?v=20261003-network25';
+import {eventSchedule} from './event_network.mjs?v=20261003-network25';
+import {networkLedger} from './network_economics.mjs?v=20261003-network25';
+import {generateDemand} from './random_demand.mjs?v=20261003-network25';
+import {trialSeeds,quantile} from './repeated.mjs?v=20261003-network25';
+import {wilson} from './paired_routes.mjs?v=20261003-network25';
 const mean=x=>x.reduce((a,b)=>a+b,0)/x.length;
 const interval=x=>{const m=mean(x);if(x.length<2)return {mean:m,low:null,high:null};const se=Math.sqrt(x.reduce((a,b)=>a+(b-m)**2,0)/(x.length-1)/x.length);return {mean:m,low:m-1.96*se,high:m+1.96*se}};
 export function connectionStudy(p,mission,candidate,o,exploreSeeds,excluded,buildInput,progress=()=>{}){

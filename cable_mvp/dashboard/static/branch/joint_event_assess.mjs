@@ -1,7 +1,7 @@
-import {eventSchedule} from './event_network.mjs?v=20261003-network23';
-import {networkLedger} from './network_economics.mjs?v=20261003-network23';
-import {wilson} from './paired_routes.mjs?v=20261003-network23';
-import {summarizeDiagnostics} from './joint_diagnostics.mjs?v=20261003-network23';
+import {eventSchedule} from './event_network.mjs?v=20261003-network25';
+import {networkLedger} from './network_economics.mjs?v=20261003-network25';
+import {wilson} from './paired_routes.mjs?v=20261003-network25';
+import {summarizeDiagnostics} from './joint_diagnostics.mjs?v=20261003-network25';
 export function assessEvent(p,mission,backgrounds,seeds,c,o,buildInput,detail=false){
  const strategy=c.chargeStrategy??'none',slots=strategy==='none'?0:o.jointChargeSlots;
  const cp={...p,groundStandby:1,energyPolicy:slots?'charge':'terminate',chargeSlots:slots,chargeStrategy:strategy==='none'?'full':strategy};

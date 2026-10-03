@@ -1,4 +1,4 @@
-import {generateLocalArrivals,serveLocalQueue} from './local_queue.mjs?v=20261003-network23';
+import {generateLocalArrivals,serveLocalQueue} from './local_queue.mjs?v=20261003-network25';
 // Local roster includes the leader. Reserved slots are held empty and provide no wake benefit.
 export function activeStations(p){return p.stationCount===5?['C','D','E']:['C','D']}
 export function randomTrips(p,station){
